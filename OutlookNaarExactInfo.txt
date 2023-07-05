@@ -1,0 +1,47 @@
+Beterwonen (BW)
+Woning stichting Anna Paulowna (WSAP)
+
+Email: dennis@bouwbedrijfhollandskroon.nl
+Wachtwoord: Wst256Wst256!
+
+Invullen velden: 
+------------------------------------------------------------------------------------------------------------------------------------------
+Contact,
+Categorie = "Service en onderhoud"
+Referentie = Opdrachtnummer
+Projectnaam = Opdrachtgever(BW OF WSAP) + Adres + Huisnummer + Woonplaats
+Postcode, 
+Huisnummer,
+Straat, 
+Plaats,
+Telefoon (Indien een optie),
+Land = "Nederland" (Select)
+Omschrijving = Adres t/m einde omschrijving
+Status = "05 - In uitvoering" (Select)
+Filiaal = "Bouwbedrijf Hollands Kroon B.V." (Select)
+Projectleider = "Dennis den Hollander" (Select)
+Meerwerk keuze = "Geen" (Opties)
+Medewerkers = "Dennis den Hollander" | (WSAP) = "Chris Stoop", "Paul Sinnige" | (BW) = "Olof Eriks", "Tieme Borst"
+
+ID's:
+------------------------------------------------------------------------------------------------------------------------------------------
+Contact = input-29
+Categorie = input-39
+Referentie = input-43
+Projectnaam = input-45
+Postcode = input-47
+Huisnummer = input-49
+Straat = input-51
+Plaats = input-53
+Telefoon (Indien een optie) = input-175
+Email gebruiker = input-176
+Land = input-55
+Status = input-64
+Filiaal = input-74
+Projectleider = input-78
+Medewerkers = input-150
+
+Omschrijving = <p> inside div class="ck-blurred ck ck-content ck-editor_editable ck-rounded-corners ck-editor_editable_inline"
+Meerwerk keuze = input-95: aria-checked = true. 
+
+Command to submit form: button[class = "mr-1 v-btn v-btn-is-elevated v-btn--has-bg theme--light v-size--default succes"]
