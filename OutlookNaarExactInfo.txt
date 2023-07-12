@@ -33,7 +33,7 @@ Postcode = input-47
 Huisnummer = input-49
 Straat = input-51
 Plaats = input-53
-Telefoon (Indien een optie) = input-175
+Telefoon = input-175
 Email gebruiker = input-176
 Land = input-55
 Status = input-64
@@ -45,3 +45,10 @@ Omschrijving = <p> inside div class="ck-blurred ck ck-content ck-editor_editable
 Meerwerk keuze = input-95: aria-checked = true. 
 
 Command to submit form: button[class = "mr-1 v-btn v-btn-is-elevated v-btn--has-bg theme--light v-size--default succes"]
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Beter Wonen:
+['Bouwbedrijf', 'Hollands', 'Kroon', 'De', 'Wieken', '50', '1777', 'HT', 'HIPPOLYTUSHOEF', 'Nederland', 'Hippolytushoef', ',', '4', 'juli', '2023', 'Opdrachtbon', 'Opdrachtnummer', ':', '2023.661.1', 'Datum', 'melding', ':', '04-07-2023', 'Ingevoerd', 'door', ':', 'D.', 'Luidinga', 'Fondscode', ':', '100', 'Werksoortcode', ':', '100', 'Gereed', 'voor', ':', '18-07-2023', 'Zonnebloemstraat', '14', ',', '1777', 'EB', 'HIPPOLYTUSHOEF', 'M.', 'de', 'Jong', 'Zonnebloemstraat', '14', '1777', 'EB', 'HIPPOLYTUSHOEF', '06-23921664', '/', '0227-820200', 'marijke.62', '@', 'hotmail.com', 'Opdracht', 'omschrijving', ':', '1', 'keukenkastje', 'sluit', 'niet', 'meer', 'goed', '.', 'Graag', 'opnieuw', 'stellen']
+
+Woning stichting Anna Paulowna:
+['Bouwbedrijf', 'Hollands', 'Kroon', 'De', 'Wieken', '50', '1777', 'HT', 'HIPPOLYTUSHOEF', 'WERKOPDRACHT', 'Werkopdrachtnummer', 'Datum', 'opdracht', 'Afspraakdatum', 'Afspraaktijd', ':', '2023', '/', '941', '/', '1', ':', '23', 'mei', '2023', ':', ':', 'tot', 'Object', ':', 'Pastoor', 'Verhoeffpark', '54', ',', 'BREEZAND', 'Complex', 'trefnaam', ':', '209', 'Behandeld', 'door', ':', 'C.A.D', '.', 'Trap', 'Huurder', ':', 'Naam', 'Telefoonnummer', ':', 'D.M', '.', 'den', 'Braber', ':', '06', '14', '21', '83', '91', 'Voor', 'akkoord', 'uitvoering', ':', 'Naam', ':', 'Datum', ':', 'Opdracht', ':', 'SOM', 'Nieuwe', 'keuken', 'plaatsen', '.', 'Datum', 'Werknemer', 'Aantal', 'uren', 'Mededelingen']
+
