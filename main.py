@@ -207,7 +207,7 @@ def SetData():
                     omschrijving += w_list[w + 2 + x]
                     if w_list[w + 3 + x] != '.':
                         omschrijving += ' '
-        projectnaam = 'WSAP ' + straat + ' ' + woonplaats
+        projectnaam = 'WSAP ' + straat + ' ' + huisnummer + ' ' + woonplaats
         contact = 2228633
         medewerkers = [{'id': 128345, 'firstName': 'Dennis', 'lastName': 'den Hollander',
                         'avatarFileHash': '240ef36c-88e9-4429-8dce-10acd636ba70'},
