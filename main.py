@@ -1,18 +1,18 @@
 import datetime
+import json
 import re
 import ssl
 from os import system, path
 from sys import exit
 from time import sleep
+
 import certifi
 import geopy.geocoders
-import pytz
 import requests
 import win32com.client
 from geopy.geocoders import Nominatim
 from nltk import word_tokenize
 from pdfminer.high_level import extract_text
-import json
 
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
@@ -75,10 +75,11 @@ def FilterData():
     _pdf = "file.pdf"
     try:
         _dataRows = extract_text(_pdf)
-    except:
+    except Exception:
         system('cls')
-        print("PDF bestand is niet mogelijk om te openen\nProbeer het opnieuw\n")
-        exit()
+        print(f"PDF bestand is niet mogelijk om te openen\nReden: {Exception} \nWe proberen het opnieuw\n")
+        sleep(3)
+        FindEmail(None)
 
     return word_tokenize(_dataRows)
 
@@ -275,7 +276,6 @@ def SetData():
 
 
 def GetToken():
-    global token
     YOUR_APPLICATION_NAME = "pdf-to-project"
     YOUR_API_KEY = "eb6454df-9c2c9427-437d-9ad9-fc9c3094aa90"
 
@@ -293,9 +293,10 @@ def GetToken():
 
     if response.status_code == 200:
         json_data = response.json()
-        token = json_data['token']
+        open('token.txt', 'w').close()
         file = open('token.txt', 'w')
-        file.write(json_data['exp'] + ': \n' + token)
+        file.write(json_data['token'])
+        CreateProject()
 
     else:
         # Fout bij het aanvragen
@@ -303,34 +304,12 @@ def GetToken():
         print(response.text)
 
 
-def TokenIsActive():
-    file = open('token.txt', 'r')
-    exp_date = file.readline()[:25]
-    if exp_date == '':
-        return False, ''
-    file_token = file.readline()
-    file.close()
-    utc = pytz.UTC
-    now = utc.localize(datetime.datetime.now())
-    expired = datetime.datetime.strptime(exp_date, '%Y-%m-%dT%H:%M:%S%z')
-
-    if now < expired:
-        return True, file_token
-    else:
-        open('token.txt', 'w').close()
-        return False, ''
-
-
 def CreateProject():
     global token
     global json_insertvalues
-    token_is_active, file_token = TokenIsActive()
 
-    if token_is_active:
-        token = file_token
-
-    else:
-        GetToken()
+    file = open('token.txt', 'r')
+    token = file.readline()
 
     url = "https://heimdall.bouw7.nl/project"
 
@@ -344,9 +323,11 @@ def CreateProject():
 
     response = requests.post(url, headers=headers, data=data)
 
-    if response.status_code == 200:
-        json_data = response.text
-        print(json_data)
+    if response.status_code == 201:
+        system('cls')
+        print("Succesvol toegevoegd")
+    elif response.status_code == 403:
+        GetToken()
     else:
         # Fout bij het aanvragen
         print(f"Fout bij aanvragen. Statuscode: {response.status_code}")
@@ -354,14 +335,12 @@ def CreateProject():
 
 
 def Again():
-    global c
-    global w_list
-    global inputvalue_list
     system('cls')
     if len(results) > 0:
         again = input('Wil je nog een pdf laten invoeren uit dezelfde mail?: (Y/N) \n')
         if again.upper() == 'Y':
             ChooseAndSetPDF()
+    system('cls')
     again = input('Wil je nog een pdf laten invoeren uit een nieuwe mail?: (Y/N) \n')
     if again.upper() == 'Y':
         print('Druk op enter als de volgende mail klaar staat')
@@ -378,7 +357,6 @@ def Again():
 
 def EverythingWhentWell():
     global json_insertvalues
-    system('cls')
     i = input('Is alles goed gegaan?: (Y/N) \n')
     if i.upper() == 'Y':
         Again()
