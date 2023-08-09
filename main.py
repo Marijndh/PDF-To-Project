@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import re
 import ssl
 from os import system, path
@@ -26,11 +27,14 @@ def ChooseAndSetPDF():
         print(results[x].Filename + '  (' + str(x) + ')')
     getal = input()
     try:
-        results[int(getal)].SaveAsFile(path.join(__file__[0:-7], 'file.pdf'))
+        results[int(getal)].SaveAsFile(os.getcwd() + '\\file.pdf')
+        while not os.path.exists("file.pdf"):
+               print("Nog niet")
+               sleep(1)
         log_file.write('PDF geselecteerd: ' + results[int(getal)].Filename + '\n')
         del results[int(getal)]
     except Exception as e:
-        log_file.write('Fout bij het opslaan van de gekozen pdf: ' + e + '\n')
+        log_file.write(f'Fout bij het opslaan van de gekozen pdf: {e} \n')
         system('cls')
         print('Er is iets fout gegaan \n We proberen het opnieuw')
         ChooseAndSetPDF()
@@ -44,10 +48,13 @@ def ReadAttachments(message):
             results.append(attachment)
     if len(results) == 1:
         try:
-            results[0].SaveAsFile(path.join(__file__[0:-7], 'file.pdf'))
+            results[0].SaveAsFile(os.getcwd() + '\\file.pdf')
+            while not os.path.exists("file.pdf"):
+                sleep(1)
             log_file.write('PDF geselecteerd: ' + results[0].Filename + '\n')
+            results = []
         except Exception as e:
-            log_file.write('Fout bij het opslaan van de pdf: ' + e + '\n')
+            log_file.write(f'Fout bij het opslaan van de pdf: {e} \n')
 
     elif len(results) > 1:
         system('cls')
@@ -76,22 +83,29 @@ def FindEmail():
             sleep(5)
             FindEmail()
     except Exception as e:
-        log_file.write('Fout bij het vinden van de geselecteerde email: ' + e + '\n')
+        log_file.write(f'Fout bij het vinden van de geselecteerde email: {e} \n')
 
 
 def FilterData():
     global log_file
-    _pdf = "file.pdf"
     try:
-        _dataRows = extract_text(_pdf)
-        log_file.write('Data is uit de pdf gehaald: \n' + _dataRows + '\n')
+        if os.path.exists("file.pdf"):
+            _pdf = "file.pdf"
+            _dataRows = extract_text(_pdf)
+            log_file.write('Data is uit de pdf gehaald: \n' + _dataRows + '\n')
+            return word_tokenize(_dataRows)
+        else:
+            print("PDF is niet juist opgeslagen")
+            log_file.write('PDF is niet juist opgeslagen'+'\n')
+            exit()
+
     except Exception as e:
         system('cls')
-        log_file.write('Fout bij het openen van de pdf: ' + e + '\n')
+        log_file.write(f'Fout bij het openen van de pdf: {e} \n')
         print("PDF bestand is niet mogelijk om te openen\nWe proberen het opnieuw\n")
         sleep(2)
         FindEmail()
-    return word_tokenize(_dataRows)
+
 
 
 def ClientNotFound():
@@ -141,14 +155,18 @@ def SetData():
     telefoon = ''
     email = ''
     contact = ''
-    medewerkers = ''
+    medewerkers = []
     omschrijving = ''
+    log_file.write("Woordenlijst: ")
+    for x in w_list:
+        log_file.write(x+" ")
+    log_file.write('\n')
     try:
         if c == 'BW':
             for w in range(len(w_list)):
                 if w_list[w] == 'Opdrachtnummer' and referentie == '':
                     referentie = w_list[w + 2]
-                if w_list[w] == 'Gereed' and w_list[w + 1] == 'voor':
+                if ((w_list[w] == 'Gereed' and w_list[w + 1] == 'voor') or w_list[w] == 'Ingevoerd') and huisnummer == '':
                     for z in range(len(w_list) - w):
                         if w_list[w + z].isnumeric() and straat == '' and huisnummer == '':
                             straat = ' '.join(w_list[w + 4:w + z])
@@ -173,6 +191,9 @@ def SetData():
                     for l in range(len(omsc)):
                         if omsc[l] == '.':
                             dots.append(l)
+                    if dots == []:
+                        omschrijving = omsc
+                        break
                     for d in range(len(dots)):
                         if len(dots) == 1:
                             omschrijving += omsc[:dots[d] - 1] + omsc[dots[d]]
@@ -233,7 +254,9 @@ def SetData():
                            {'id': 129808, 'firstName': 'Paul', 'lastName': 'Sinnige',
                             'avatarFileHash': 'bab77c4b-e5e4-4e6b-bd8a-7db32c196ff2'}]
     except Exception as e:
-        log_file.write('Fout bij het ophalen van de data: ' + e + '\n')
+        print("Fout bij ophalen van data")
+        log_file.write(f'Fout bij het ophalen van de data: {e} \n')
+        exit()
 
     json_insertvalues = {
         "type": 0,
@@ -322,7 +345,7 @@ def GetToken():
         else:
             GetToken()
     except Exception as e:
-        log_file.write('Fout bij het ophalen van een nieuwe token: ' + e + '\n')
+        log_file.write(f'Fout bij het ophalen van een nieuwe token: {e} \n')
 
 
 def CreateProject():
@@ -349,14 +372,15 @@ def CreateProject():
         if response.status_code == 201:
             system('cls')
             print("Succesvol toegevoegd")
-        elif response.status_code == 403:
+        elif response.status_code == 400:
+            print("Er gaat wat fout bij het versturen, start het programma opnieuw op")
+            log_file.write(f"Fout bij aanvragen. Statuscode: {response.status_code}, Text: {response.text}\n")
+            exit()
+        else:
             log_file.write(f"Fout bij aanvragen. Statuscode: {response.status_code}, Text: {response.text}\n")
             GetToken()
-        else:
-            # Fout bij het aanvragen
-            log_file.write(f"Fout bij aanvragen. Statuscode: {response.status_code}, Text: {response.text}\n")
     except Exception as e:
-        log_file.write('Fout bij het sturen van het project: ' + e + '\n')
+        log_file.write(f'Fout bij het sturen van het project: {e} \n')
 
 
 def Again():
@@ -390,7 +414,7 @@ def EverythingWhentWell():
     if i.upper() == 'N':
         data = input('Wat is er precies fout gegaan?: \n')
         if data != '':
-            log_file.write(data + '\n')
+            log_file.write('Opmerking: ' + data + '\n')
             Again()
         else:
             print('Er is wat fout gegaan, we proberen het opnieuw')
@@ -411,6 +435,8 @@ def Main():
     SetData()
     CreateProject()
     EverythingWhentWell()
+    if os.path.exists("file.pdf"):
+        os.remove("file.pdf")
 
 
 log_file = open(f'Logs/{datetime.datetime.now().strftime("%m-%d-%Y-%H-%M-%S")}.txt', 'w')
