@@ -8,12 +8,14 @@ from time import sleep
 
 import certifi
 import geopy.geocoders
+import nltk
 import requests
 import win32com.client
 from geopy.geocoders import Nominatim
 from nltk import word_tokenize
 from pdfminer.high_level import extract_text
 
+nltk.download('punkt')
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
 
@@ -52,10 +54,10 @@ def FindEmail(titel):
     message = None
     outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
     inbox = outlook.GetDefaultFolder(6)
+    find_selection = win32com.client.Dispatch("Outlook.Application")
     messages = inbox.Items
-    outlook = win32com.client.Dispatch("Outlook.Application")
-    if outlook.ActiveExplorer() is not None:
-        selection = outlook.ActiveExplorer().Selection
+    if find_selection.ActiveExplorer() is not None:
+        selection = find_selection.ActiveExplorer().Selection
         if selection.Count > 0:
             message = selection.Item(1)
     if titel is not None:
@@ -326,7 +328,7 @@ def CreateProject():
     if response.status_code == 201:
         system('cls')
         print("Succesvol toegevoegd")
-    elif response.status_code == 403:
+    elif response.status_code == 403 or response.status_code == 400:
         GetToken()
     else:
         # Fout bij het aanvragen
