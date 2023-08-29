@@ -83,6 +83,9 @@ class MainWindow(QMainWindow):
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
+    def closeEvent(self, event):
+        os.system.exit(0)
+
     def ClearFoundObject(self):
         self.found_objects.clear()
         self.found_objects.addItem('Status van programma: ')

@@ -69,7 +69,8 @@ def ReadAttachments(message):
         if len(results) == 0:
             window.Alert("Deze mail bevat geen pdf's")
             FindEmail()
-        ReadAttachments(message)
+        else:
+            ReadAttachments(message)
 
 
 def FindEmail():
@@ -253,8 +254,8 @@ def SetData():
             window.AddStatusLabel('Postcode kon niet gevonden worden')
             SetData()
         else:
-            log_file.write('Fout bij het ophalen van de data: ' + str(e) + '\n' + json.dumps(json_insertvalues))
-            SetData()
+            window.AddStatusLabel('Fout bij het ophalen van de data uit deze mail')
+            log_file.write('Fout bij het ophalen van de data: ' + str(e) + '\n' + json.dumps(json_insertvalues) + '\n')
 
 
 def GetToken():
@@ -399,25 +400,20 @@ def Main():
 
 def FindTitleLoop():
     while not window.running_main:
-        if not window.isActiveWindow():
-            sys.exit(0)
         try:
             outlook = win32com.client.Dispatch("Outlook.Application")
-            if outlook.ActiveExplorer() is not None:
-                selection = outlook.ActiveExplorer().Selection
-                if selection.Count > 0:
-                    message = selection.Item(1)
-                    window.SetTitel(message.subject)
+            selection = outlook.ActiveExplorer().Selection
+            if selection.Count > 0:
+                message = selection.Item(1)
+                window.SetTitel(message.subject)
             if window.run_main_again:
                 window.run_main_again = False
                 Main()
             if window.send_email != '':
                 SendMail('Logs/' + window.send_email)
                 window.send_email = ''
-            else:
-                FindTitleLoop()
         except:
-            FindTitleLoop()
+            window.SetTitel("*Nog geen email titel kunnen vinden*")
 
 
 ctx = ssl.create_default_context(cafile=certifi.where())
