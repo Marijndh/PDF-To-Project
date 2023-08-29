@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import re
 import ssl
 import sys
@@ -8,6 +9,7 @@ from os import path
 
 import certifi
 import geopy.geocoders
+import nltk
 import requests
 import win32com.client
 from PyQt5.QtWidgets import QApplication
@@ -15,7 +17,13 @@ from geopy.geocoders import Nominatim
 from nltk import word_tokenize
 from pdfminer.high_level import extract_text
 
+
 import GUI
+
+nltk.download('punkt')
+ctx = ssl.create_default_context(cafile=certifi.where())
+geopy.geocoders.options.default_ssl_context = ctx
+
 
 
 def ChooseAndSetPDF():
@@ -42,6 +50,8 @@ def SaveFile(getal, message):
     try:
         window.Searching_For('Bijlage opslaan')
         results[int(getal)].SaveAsFile(path.join(__file__[0:-7], 'file.pdf'))
+        while not os.path.exists("file.pdf"):
+          sleep(1)
         log_file.write('PDF geselecteerd: ' + results[0].Filename + '\n')
         window.AddStatusLabel('PDF geselecteerd: ' + results[0].Filename)
         del results[int(getal)]
@@ -52,7 +62,6 @@ def SaveFile(getal, message):
             ChooseAndSetPDF()
         else:
             ReadAttachments(message)
-
 
 def ReadAttachments(message):
     window.Searching_For('Bijlagen uitlezen')
@@ -97,17 +106,23 @@ def FindEmail():
 def FilterData():
     window.Searching_For('Data uit pdf lezen')
     global log_file
-    _pdf = "file.pdf"
     try:
-        _dataRows = extract_text(_pdf)
-        window.AddStatusLabel('Data is succesvol uit de pdf gehaald')
-        log_file.write('Data is uit de pdf gehaald: \n' + _dataRows + '\n')
-        return word_tokenize(_dataRows)
-    except Exception as e:
-        log_file.write('Fout bij het openen van de pdf: ' + str(e) + '\n')
-        window.Alert("PDF bestand is niet mogelijk om te openen\nWe proberen het opnieuw\n")
-        FindEmail()
+        if os.path.exists("file.pdf"):
+            _pdf = "file.pdf"
+            _dataRows = extract_text(_pdf)
+            window.AddStatusLabel('Data is succesvol uit de pdf gehaald')
+            log_file.write('Data is uit de pdf gehaald: \n' + _dataRows + '\n')
+            return word_tokenize(_dataRows)
+        else:
+            log_file.write('Fout bij het openen van de pdf: ' + str(e) + '\n')
+            window.Alert("PDF bestand is niet mogelijk om te openen\nWe proberen het opnieuw\n")
+            FindEmail()
 
+    except Exception as e:
+        system('cls')
+        log_file.write(f'Fout bij het openen van de pdf: {e} \n')
+        print("PDF bestand is niet mogelijk om te openen\nWe proberen het opnieuw\n")
+        FindEmail()
 
 def ClientNotFound():
     global log_file
@@ -179,6 +194,9 @@ def SetData():
                     for l in range(len(omsc)):
                         if omsc[l] == '.':
                             dots.append(l)
+                    if dots == []:
+                        omschrijving = omsc
+                        break
                     for d in range(len(dots)):
                         if len(dots) == 1:
                             json_insertvalues["information"] += omsc[:dots[d] - 1] + omsc[dots[d]]
@@ -257,7 +275,6 @@ def SetData():
             window.AddStatusLabel('Fout bij het ophalen van de data uit deze mail')
             log_file.write('Fout bij het ophalen van de data: ' + str(e) + '\n' + json.dumps(json_insertvalues) + '\n')
 
-
 def GetToken():
     window.Searching_For('Token ophalen')
     global log_file
@@ -292,6 +309,7 @@ def GetToken():
         log_file.write('Fout bij het ophalen van een nieuwe token: ' + str(e) + '\n')
 
 
+
 def CreateProject():
     window.Searching_For('Project aanmaken')
     global log_file
@@ -320,14 +338,13 @@ def CreateProject():
             log_file.write('Gestuurde JSON: ' + json.dumps(json_insertvalues) + '\n')
         elif response.status_code == 403:
             log_file.write(f"Fout bij aanvragen. Statuscode: {response.status_code}, Text: {response.text}\n")
-            GetToken()
+            exit()
         else:
-            # Fout bij het aanvragen
             log_file.write(f"Fout bij aanvragen. Statuscode: {response.status_code}, Text: {response.text}\n")
+            GetToken()
     except Exception as e:
         log_file.write('Fout bij het sturen van het project: ' + str(e) + '\n')
         CreateProject()
-
 
 def Again():
     global results
@@ -366,7 +383,7 @@ def EverythingWhentWell():
         data = window.AskQuestion('Wat is er precies fout gegaan?: \n')
         if data is not None and data != '':
             log_file.write('Opmerking: ' + data + '\n')
-            # SendMail(log_file.name)
+            SendMail(log_file.name)
             Again()
         else:
             window.Alert('Er is wat fout gegaan, we proberen het opnieuw')
@@ -390,12 +407,16 @@ def Main():
     log_file.write('Woordenlijst: ' + w_list.__str__() + '\n')
     client = GetClient()
     SetData()
-    # CreateProject()
+    CreateProject()
     EverythingWhentWell()
+    
     log_file.close()
-
+    if os.path.exists("file.pdf"):
+        os.remove("file.pdf")
+        
     window.AddLogs()
     window.SetRunningMain(False)
+
 
 
 def FindTitleLoop():
