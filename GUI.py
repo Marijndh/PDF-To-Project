@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -84,7 +86,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def closeEvent(self, event):
-        os.system.exit(0)
+        sys.exit()
 
     def ClearFoundObject(self):
         self.found_objects.clear()
@@ -98,8 +100,8 @@ class MainWindow(QMainWindow):
         if not self.running_main:
             if self.recent_logs.selectedItems() is not None:
                 x = self.recent_logs.selectedItems()[0]
-                osCommandString = f"notepad.exe Logs/{x.text()}"
-                os.system(osCommandString)
+                CREATE_NO_WINDOW = 0x08000000
+                subprocess.Popen(f"notepad.exe Logs/{x.text()}", creationflags=CREATE_NO_WINDOW)
 
                 answer = self.AskQuestion("Wil je deze log-file mailen? Y/N")
                 if answer.upper() == 'Y':
