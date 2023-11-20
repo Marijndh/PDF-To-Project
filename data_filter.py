@@ -16,7 +16,7 @@ def filter_data(client, log_file, window, w_list, json_values):
             json_values = json.load(f)
     try:
         if client == 'BW':
-            bw(client, window, w_list, json_values)
+            bw(window, w_list, json_values)
         elif client == 'WSAP':
             wsap(window, w_list, json_values)
     except Exception as e:
@@ -31,64 +31,50 @@ def filter_data(client, log_file, window, w_list, json_values):
     return json_values
 
 
-def bw(client, window, w_list, json_values):
+def bw(window, w_list, json_values):
     window.searching_for('Data filteren')
-    if client == 'BW' and w_list != []:
-        for w in range(len(w_list)):
-            if w_list[w] == 'Opdrachtnummer' and json_values["reference"] == '':
-                json_values["reference"] = w_list[w + 2]
-            if w_list[w] == 'Gereed' and w_list[w + 1] == 'voor':
-                for z in range(len(w_list) - w):
-                    if w_list[w + z].isnumeric() and json_values["streetName"] == '' and json_values[
-                        "houseNumber"] == '':
-                        json_values["streetName"] = ' '.join(w_list[w + 4:w + z])
-                        json_values["houseNumber"] = w_list[w + z]
-                    if re.search(r"\b\d{4}\b", w_list[w + z]) and json_values["city"] == '' and \
-                            json_values[
-                                "zipCode"] == '' and w + z < len(w_list) - 1:
-                        if re.search(r"\b[A-Z]{2}\b", w_list[w + z + 1]):
-                            json_values["city"] = w_list[w + z + 2]
-                            json_values["zipCode"] = w_list[w + z] + ' ' + w_list[w + z + 1]
-                            break
-            if w_list[w][0:2] == '06' or (w_list[w][0:4] == '0227' and json_values["customAttributeValues"][0]["value"] == ''):
-                if sum(c.isdigit() for c in w_list[w]) == 10:
-                    json_values["customAttributeValues"][0]["value"] = w_list[w]
-                else:
-                    number = w_list[w]
-                    for x in range(9):
-                        if w_list[w + x].isnumeric() and w + x < len(w_list) - 1:
-                            number += w_list[w + x]
-                    if sum(c.isdigit() for c in number) == 10:
-                        json_values["customAttributeValues"][0]["value"] = number
-            if w_list[w] == '@' and json_values["customAttributeValues"][1]["value"] == '':
-                json_values["customAttributeValues"][1]["value"] = w_list[w - 1] + w_list[w] + w_list[w + 1]
-            if w_list[w] == 'omschrijving' and w_list[w + 1] == ':' and json_values["information"] == '':
-                dots = []
-                description = ' '.join(w_list[w + 2:])
-                for l in range(len(description)):
-                    if description[l] == '.':
-                        dots.append(l)
-                if not dots:
-                    json_values["information"] = description
+    for w in range(len(w_list)):
+        if w_list[w] == 'Opdrachtnummer' and json_values["reference"] == '':
+            json_values["reference"] = w_list[w + 2]
+        if w_list[w] == 'Opdrachtbon':
+            for z in range(len(w_list) - w - 1):
+                if re.search(r"\b\d{4}\b", w_list[w + z]) and re.search(r"^[A-Z]{2}$", w_list[w + z + 1]) and \
+                        json_values["city"] == '' and json_values["zipCode"] == '':
+                    json_values["zipCode"] = w_list[w + z] + ' ' + w_list[w + z + 1]
+                    json_values["city"] = w_list[w + z + 2]
+                    json_values["houseNumber"] = w_list[w + z - 2]
+                    json_values["streetName"] = w_list[w + z - 3]
+        if w_list[w][0:2] == '06' or (
+                w_list[w][0:4] == '0227' and json_values["customAttributeValues"][0]["value"] == ''):
+            if sum(c.isdigit() for c in w_list[w]) == 10:
+                json_values["customAttributeValues"][0]["value"] = w_list[w]
+            else:
+                number = w_list[w]
+                for x in range(9):
+                    if w_list[w + x].isnumeric() and w + x < len(w_list) - 1:
+                        number += w_list[w + x]
+                if sum(c.isdigit() for c in number) == 10:
+                    json_values["customAttributeValues"][0]["value"] = number
+        if w_list[w] == '@' and json_values["customAttributeValues"][1]["value"] == '':
+            json_values["customAttributeValues"][1]["value"] = w_list[w - 1] + w_list[w] + w_list[w + 1]
+        if w_list[w] == 'omschrijving' and w_list[w + 1] == ':' and json_values["information"] == '':
+            description = ''
+            for y in range(len(w_list) - w - 3):
+                if w_list[w + y + 3].lower() == 'werksoortcode':
+                    description = ' '.join(w_list[w + 3:w + y + 3])
                     break
-                for d in range(len(dots)):
-                    if len(dots) == 1:
-                        json_values["information"] += description[:dots[d] - 1] + description[dots[d]]
-                    elif d == 0:
-                        json_values["information"] += description[:dots[d] - 1] + description[dots[d]:dots[d + 1] - 1]
-                    elif d != len(dots) - 1:
-                        json_values["information"] += description[dots[d]:dots[d + 1] - 1]
-                    else:
-                        json_values["information"] += description[dots[d]]
-        json_values["name"] = 'BW ' + json_values["streetName"] + ' ' + json_values[
-            "houseNumber"] + ' ' + json_values["city"]
-        json_values["contact"]["id"] = 2227585
-        json_values["employees"] = [{'id': 128345, 'firstName': 'Dennis', 'lastName': 'den Hollander',
-                                     'avatarFileHash': '240ef36c-88e9-4429-8dce-10acd636ba70'},
-                                    {'id': 128434, 'firstName': 'Olof', 'lastName': 'Eriks',
-                                     'avatarFileHash': '84b8feca-dc03-473f-a506-941399db5ec0'},
-                                    {'id': 128453, 'firstName': 'Tieme', 'lastName': 'Borst',
-                                     'avatarFileHash': '21da4364-1d28-4f0b-a75c-6a02b013bd67'}]
+            if description == '':
+                description = ' '.join(w_list[w + 2:])
+            description = description.replace(" ,", ",")
+            description = description.replace(" .", ".")
+            json_values["information"] = description
+    json_values["name"] = 'BW ' + json_values["streetName"] + ' ' + json_values[
+        "houseNumber"] + ' ' + json_values["city"]
+    json_values["contact"]["id"] = 2227585
+    json_values["employees"] = [{'id': 128434, 'firstName': 'Olof', 'lastName': 'Eriks',
+                                 'avatarFileHash': '84b8feca-dc03-473f-a506-941399db5ec0'},
+                                {'id': 128453, 'firstName': 'Tieme', 'lastName': 'Borst',
+                                 'avatarFileHash': '21da4364-1d28-4f0b-a75c-6a02b013bd67'}]
 
 
 def wsap(window, w_list, json_values):
@@ -133,9 +119,7 @@ def wsap(window, w_list, json_values):
     json_values["name"] = 'WSAP ' + json_values["streetName"] + ' ' + json_values[
         "houseNumber"] + ' ' + json_values["city"]
     json_values["contact"]["id"] = 2228633
-    json_values["employees"] = [{'id': 128345, 'firstName': 'Dennis', 'lastName': 'den Hollander',
-                                 'avatarFileHash': '240ef36c-88e9-4429-8dce-10acd636ba70'},
-                                {'id': 128445, 'firstName': 'Chris', 'lastName': 'Stoop',
+    json_values["employees"] = [{'id': 128445, 'firstName': 'Chris', 'lastName': 'Stoop',
                                  'avatarFileHash': '20b41093-4179-4621-924f-72b3d337ae18'},
                                 {'id': 129808, 'firstName': 'Paul', 'lastName': 'Sinnige',
                                  'avatarFileHash': 'bab77c4b-e5e4-4e6b-bd8a-7db32c196ff2'}]
