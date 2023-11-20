@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QMainWindow, QGridLayout, QWidget, QLabel, QListWidg
     QDialogButtonBox, QVBoxLayout, QLineEdit, QMessageBox, QApplication
 
 
+# noinspection PyMethodMayBeStatic,PyUnresolvedReferences
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -51,12 +52,12 @@ class MainWindow(QMainWindow):
 
         self.email_titel = QLabel("*Nog geen email titel kunnen vinden*")
         self.found_objects = QListWidget()
-        self.ClearFoundObject()
+        self.clear_found_object()
         self.recent_logs = QListWidget()
-        self.recent_logs.itemDoubleClicked.connect(self.LogsDoubleClick)
-        self.AddLogs()
+        self.recent_logs.itemDoubleClicked.connect(self.logs_double_click)
+        self.add_logs()
         self.again = QPushButton("Opnieuw")
-        self.again.clicked.connect(self.ButtonClick)
+        self.again.clicked.connect(self.button_click)
 
         self.email_titel.setFixedSize(790, 35)
         self.search.setFixedSize(300, 350)
@@ -88,29 +89,29 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         sys.exit()
 
-    def ClearFoundObject(self):
+    def clear_found_object(self):
         self.found_objects.clear()
         self.found_objects.addItem('Status van programma: ')
         self.found_objects.item(0).setFont(QFont('Arial', 10, 100))
 
-    def ButtonClick(self):
+    def button_click(self):
         self.run_main_again = True
 
-    def LogsDoubleClick(self):
+    def logs_double_click(self):
         if not self.running_main:
             if self.recent_logs.selectedItems() is not None:
                 x = self.recent_logs.selectedItems()[0]
                 CREATE_NO_WINDOW = 0x08000000
                 subprocess.Popen(f"notepad.exe Logs/{x.text()}", creationflags=CREATE_NO_WINDOW)
 
-                answer = self.AskQuestion("Wil je deze log-file mailen? Y/N")
+                answer = self.ask_question("Wil je deze log-file mailen? Y/N")
                 if answer.upper() == 'Y':
                     self.send_email = x.text()
 
-    def SetRunningMain(self, running):
+    def set_running_main(self, running):
         self.running_main = running
 
-    def AddLogs(self):
+    def add_logs(self):
         self.recent_logs.clear()
         self.recent_logs.addItem('Recente log-files: ')
         self.recent_logs.item(0).setFont(QFont('Arial', 10, 100))
@@ -120,15 +121,15 @@ class MainWindow(QMainWindow):
             self.recent_logs.addItem(x)
         QApplication.processEvents()
 
-    def SetTitel(self, titel):
+    def set_titel(self, titel):
         self.email_titel.setText(titel)
         QApplication.processEvents()
 
-    def AddStatusLabel(self, text):
+    def add_status_label(self, text):
         self.found_objects.addItem(text)
         QApplication.processEvents()
 
-    def Alert(self, text):
+    def alert(self, text):
         button = QMessageBox.critical(
             QMainWindow(),
             " ",
@@ -138,7 +139,7 @@ class MainWindow(QMainWindow):
         )
         QApplication.processEvents()
 
-    def AskQuestion(self, question):
+    def ask_question(self, question):
         dlg = QDialog(self)
         dlg.setStyleSheet("background-color: white;")
         dlg.setWindowTitle(" ")
@@ -157,10 +158,10 @@ class MainWindow(QMainWindow):
         if dlg.exec():
             return answer.text()
         else:
-            self.AskQuestion(question)
+            self.ask_question(question)
         QApplication.processEvents()
 
-    def Searching_For(self, search):
+    def searching_for(self, search):
         if len(self.dots.text()) > 9:
             self.dots.setText('.')
         else:
