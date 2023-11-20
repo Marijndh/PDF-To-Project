@@ -50,14 +50,16 @@ def bw(client, window, w_list, json_values):
                             json_values["city"] = w_list[w + z + 2]
                             json_values["zipCode"] = w_list[w + z] + ' ' + w_list[w + z + 1]
                             break
-            if w_list[w][0:1] == '06' and json_values["customAttributeValues"][0]["value"] == '' or w_list[w][
-                                                                                                    0:3] == '0227':
-                if len(w_list[w]) >= 10:
+            if w_list[w][0:2] == '06' or (w_list[w][0:4] == '0227' and json_values["customAttributeValues"][0]["value"] == ''):
+                if sum(c.isdigit() for c in w_list[w]) == 10:
                     json_values["customAttributeValues"][0]["value"] = w_list[w]
                 else:
+                    number = w_list[w]
                     for x in range(9):
                         if w_list[w + x].isnumeric() and w + x < len(w_list) - 1:
-                            json_values["customAttributeValues"][0]["value"] += w_list[w + x]
+                            number += w_list[w + x]
+                    if sum(c.isdigit() for c in number) == 10:
+                        json_values["customAttributeValues"][0]["value"] = number
             if w_list[w] == '@' and json_values["customAttributeValues"][1]["value"] == '':
                 json_values["customAttributeValues"][1]["value"] = w_list[w - 1] + w_list[w] + w_list[w + 1]
             if w_list[w] == 'omschrijving' and w_list[w + 1] == ':' and json_values["information"] == '':
