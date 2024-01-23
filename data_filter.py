@@ -72,9 +72,7 @@ def bw(window, w_list, json_values):
         "houseNumber"] + ' ' + json_values["city"]
     json_values["contact"]["id"] = 2227585
     json_values["employees"] = [{'id': 128434, 'firstName': 'Olof', 'lastName': 'Eriks',
-                                 'avatarFileHash': '84b8feca-dc03-473f-a506-941399db5ec0'},
-                                {'id': 128453, 'firstName': 'Tieme', 'lastName': 'Borst',
-                                 'avatarFileHash': '21da4364-1d28-4f0b-a75c-6a02b013bd67'}]
+                                 'avatarFileHash': '84b8feca-dc03-473f-a506-941399db5ec0'}]
 
 
 def wsap(window, w_list, json_values):
