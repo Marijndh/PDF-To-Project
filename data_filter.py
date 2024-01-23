@@ -59,9 +59,9 @@ def bw(window, w_list, json_values):
             json_values["customAttributeValues"][1]["value"] = w_list[w - 1] + w_list[w] + w_list[w + 1]
         if w_list[w] == 'omschrijving' and w_list[w + 1] == ':' and json_values["information"] == '':
             description = ''
-            for y in range(len(w_list) - w - 3):
-                if w_list[w + y + 3].lower() == 'werksoortcode':
-                    description = ' '.join(w_list[w + 3:w + y + 3])
+            for y in range(3, len(w_list) - w - 3):
+                if w_list[w + y].lower() == 'werksoortcode':
+                    description = ' '.join(w_list[w:w + y])
                     break
             if description == '':
                 description = ' '.join(w_list[w + 2:])
@@ -81,39 +81,39 @@ def wsap(window, w_list, json_values):
         if w_list[w] == '/' and w_list[w + 2] == '/' and json_values["reference"] == '':
             json_values["reference"] = w_list[w - 1] + ' ' + w_list[w] + ' ' + w_list[w + 1] + ' ' + \
                                        w_list[w + 2] + ' ' + \
-                                       w_list[
-                                           w + 3]
+                                       w_list[w + 3]
         if w_list[w] == 'Object' and w_list[w + 1] == ':' and json_values["houseNumber"] == '':
-            for z in range(len(w_list)):
-                if w_list[w + 2 + z] == ',' and json_values["city"] == '' and w + z + 2 < len(w_list) - 1:
-                    json_values["city"] = w_list[w + 3 + z]
+            for z in range(3, len(w_list)-w-1):
+                if w_list[w + z] == ',' and json_values["city"] == '':
+                    for x in range(len(w_list)-w-z-1):
+                        if w_list[w+z+x] == 'Behandeld':
+                            json_values["city"] = ' '.join(w_list[w+z+1:w+z+x])
                 if w_list[w + z].isnumeric() and json_values["streetName"] == '':
                     json_values["houseNumber"] = w_list[w + z]
                     json_values["streetName"] = ' '.join(w_list[w + 2:w + z])
-                    if json_values["streetName"] != '' and json_values["zipCode"] == '':
-                        loc = locator.geocode(
-                            json_values["streetName"] + " " + json_values["houseNumber"])
-                        zip_code = locator.reverse(loc.point).raw['address'][
-                            'postcode']
-                        json_values["zipCode"] = zip_code
-                        if json_values["city"] == '':
-                            json_values["city"] = locator.reverse(loc.point).raw['address']['town']
-                        break
-
         if w_list[w] == 'Telefoonnummer' and w_list[w + 1] == ':' and \
                 json_values["customAttributeValues"][0]["value"] == '':
-            for x in range(len(w_list) - w - 2):
-                if w_list[w + 2 + x] == ':' and w_list[w + 3 + x] == '06' or w_list[w + 3 + x] == '0227':
-                    json_values["customAttributeValues"][0]["value"] = ''.join(
-                        w_list[w + 3 + x:w + 2 + x + 6])
+            for x in range(len(w_list) - w - 1):
+                if w_list[w + x][0:3] == '022':
+                    json_values["customAttributeValues"][0]["value"] = w_list[w + x]
+                if w_list[w + x][:2] == '06':
+                    json_values["customAttributeValues"][0]["value"] = w_list[w + x]
                     break
         if w_list[w] == 'Opdracht' and w_list[w + 1] == ':' and json_values["information"] == '':
-            for x in range(len(w_list) - w):
-                if w_list[w + 2 + x] == 'Datum':
+            for x in range(2, len(w_list) - w):
+                if w_list[w + x] == 'Datum':
                     break
-                json_values["information"] += w_list[w + 2 + x]
-                if w_list[w + 3 + x] != '.':
+                json_values["information"] += w_list[w + x]
+                if w_list[w + x + 1] != '.':
                     json_values["information"] += ' '
+    if json_values["streetName"] != '' and json_values["zipCode"] == '':
+        loc = locator.geocode(
+            json_values["streetName"] + " " + json_values["houseNumber"])
+        zip_code = locator.reverse(loc.point).raw['address'][
+            'postcode']
+        json_values["zipCode"] = zip_code
+        if json_values["city"] == '':
+            json_values["city"] = locator.reverse(loc.point).raw['address']['town']
     json_values["name"] = 'WSAP ' + json_values["streetName"] + ' ' + json_values[
         "houseNumber"] + ' ' + json_values["city"]
     json_values["contact"]["id"] = 2228633
