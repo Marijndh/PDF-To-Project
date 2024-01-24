@@ -16,8 +16,8 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("PDF-To-Project")
 
-        self.running_main = False
-        self.run_main_again = False
+        self.running = True
+        self.run_main_again = True
         self.send_email = ''
 
         self.setFixedSize(800, 450)
@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def closeEvent(self, event):
+        self.running = False
         sys.exit()
 
     def clear_found_object(self):
@@ -98,18 +99,17 @@ class MainWindow(QMainWindow):
         self.run_main_again = True
 
     def logs_double_click(self):
-        if not self.running_main:
-            if self.recent_logs.selectedItems() is not None:
-                x = self.recent_logs.selectedItems()[0]
-                CREATE_NO_WINDOW = 0x08000000
-                subprocess.Popen(f"notepad.exe Logs/{x.text()}", creationflags=CREATE_NO_WINDOW)
+        if self.recent_logs.selectedItems() is not None:
+            x = self.recent_logs.selectedItems()[0]
+            CREATE_NO_WINDOW = 0x08000000
+            subprocess.Popen(f"notepad.exe Logs/{x.text()}", creationflags=CREATE_NO_WINDOW)
 
-                answer = self.ask_question("Wil je deze log-file mailen? Y/N")
-                if answer.upper() == 'Y':
-                    self.send_email = x.text()
+            answer = self.ask_question("Wil je deze log-file mailen? Y/N")
+            if answer.upper() == 'Y':
+                self.send_email = x.text()
 
-    def set_running_main(self, running):
-        self.running_main = running
+    def set_run_again(self, running):
+        self.run_main_again = running
 
     def add_logs(self):
         self.recent_logs.clear()
