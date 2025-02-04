@@ -1,11 +1,16 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
+import 'vuetify/styles';
+import dotenv from "dotenv";
+import fs from "fs";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
+
+dotenv.config();
 
 const createWindow = () => {
   // Create the browser window.
@@ -14,6 +19,8 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: true,
     },
     title: app.name,
     autoHideMenuBar: true,
@@ -56,5 +63,21 @@ app.on('activate', () => {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
+ipcMain.on("update-token", (event, token) => {
+  try {
+    const envPath = path.resolve(process.cwd(), ".env");
+    const envContent = fs.readFileSync(envPath, "utf-8");
+
+    const updatedEnvContent = envContent.replace(/API_TOKEN=.*/g, `API_TOKEN=${token}`);
+    fs.writeFileSync(envPath, updatedEnvContent);
+
+    dotenv.config(); // Reload environment variables
+    console.log("Token updated successfully!");
+  } catch (error) {
+    console.error("Failed to update token:", error);
+  }
+});
+
+ipcMain.handle('open-external', async (_event, url) => {
+  await shell.openExternal(url);
+});
