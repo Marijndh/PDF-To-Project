@@ -15,7 +15,7 @@
           <span>Bestand geüpload: {{ this.file.name }}</span>
         </v-row>
         <v-row class="button-row">
-          <v-btn>
+          <v-btn @click="this.$emit('file-accepted', this.file)">
             <i class="material-icons">check</i>
           </v-btn>
           <v-btn  @click="this.deleteFile">

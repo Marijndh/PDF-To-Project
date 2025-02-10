@@ -1,8 +1,9 @@
 class RequestController {
     protected readonly apiUrl: string;
     protected readonly apiKey: string;
-    protected apiToken: string;
     protected readonly appName: string;
+    protected apiToken: string;
+
 
     constructor() {
         this.apiUrl = import.meta.env.VITE_API_URL;

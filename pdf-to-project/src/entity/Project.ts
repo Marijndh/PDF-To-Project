@@ -10,7 +10,7 @@ class Project {
         return this.id;
     }
 
-    public getName() {
+    public getName(): string {
         return this.name;
     }
 }

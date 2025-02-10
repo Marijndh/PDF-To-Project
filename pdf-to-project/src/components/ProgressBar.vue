@@ -3,7 +3,6 @@
     <!-- Title and Loading Spinner -->
     <div class="spinner-container">
       <div class="spinner"></div>
-      <span class="title">{{ this.title }}</span>
     </div>
 
     <!-- Progress Bar -->
@@ -17,16 +16,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import {defineComponent, computed, onMounted} from "vue";
 
 export default defineComponent({
   name: "ProgressBar",
   props: {
-    title: {
-      type: String,
-      required: false,
-      default: "Loading...",
-    },
     currentStep: {
       type: Number,
       required: true,
@@ -65,7 +59,7 @@ export default defineComponent({
   font-family: Helvetica, Arial, sans-serif;
   margin-bottom: 10px;
   margin-top: 5px;
-  padding: 20px;
+  padding: 30px 20px;
   height: 250px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -75,35 +69,26 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .spinner {
   border: 8px solid rgba(0, 0, 0, 0.1); /* Light gray border */
   border-top: 10px solid #5cff88; /* Active color */
   border-radius: 50%;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   animation: spin 1s linear infinite;
 }
-
-.title {
-  margin-top: 10px;
-  font-size: 30px;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-}
 .progress-bar {
-  position: relative;
   height: 30px;
   width: 100%;
   background-color: #444;
   border-radius: 10px;
   border: 4px solid #1e1e1e;
   overflow: hidden;
-  margin: 0 10px;
-  justify-self: end;
+  margin: 0;
+  justify-self: center;
 }
 
 .progress-bar-fill {

@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import {app, BrowserWindow, ipcMain, shell} from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import 'vuetify/styles';
 import dotenv from "dotenv";
 import fs from "fs";
+import nodemailer from "nodemailer";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -80,4 +81,53 @@ ipcMain.on("update-token", (event, token) => {
 
 ipcMain.handle('open-external', async (_event, url) => {
   await shell.openExternal(url);
+});
+
+ipcMain.handle('get-logs', async (_event, amount: number) => {
+  const logDir = path.resolve(process.cwd(), "logs");
+
+  if (!fs.existsSync(logDir)) {
+    console.error(`Directory not found: ${logDir}`);
+    return []; // Return an empty array instead of throwing an error
+  }
+
+  const files = fs.readdirSync(logDir).slice(0, amount);
+  return { dir: logDir, files };
+});
+
+ipcMain.handle('open-file', async (_event, path) => {
+  await shell.openPath(path);
+});
+
+ipcMain.handle('send-email', async (_event, from, to, path, name, client_id, client_secret, refresh_token, access_token) => {
+  console.log(refresh_token);
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      type: "OAuth2",
+      user: from,
+      clientId: client_id,
+      clientSecret: client_secret,
+      refreshToken: refresh_token,
+      accessToken: access_token,
+      expires: 0,
+    }
+  });
+
+  const mailOptions = {
+    from: from,
+    to: to,
+    subject: 'Log-File: ' + name,
+    text: fs.readFileSync(path, 'utf-8')
+  };
+
+  transporter.sendMail(mailOptions, (error: any, info: any) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
 });

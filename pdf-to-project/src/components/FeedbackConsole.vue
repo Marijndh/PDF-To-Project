@@ -16,36 +16,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, nextTick, PropType } from "vue";
+import { defineComponent, ref, watch, nextTick, PropType } from "vue";
+import {Log} from "@/entity/Log";
 
-// Define the Log type
-interface Log {
-  message: string;
-  type: "info" | "error" | "success" | "warn";
-}
 
 export default defineComponent({
   name: "ConsoleComponent",
   props: {
-    // Allow initial logs to be passed via a prop
-    initialLogs: {
+    logs: {
       type: Array as PropType<Log[]>,
       default: () => [] as PropType<Log[]>,
     },
   },
   setup(props) {
-    // Reactive state for the logs
-    const logs = ref<Log[]>([...props.initialLogs]);
-
-    // Methods
-    const addLog = (message: string, type: Log["type"] = "info") => {
-      logs.value.push({ message, type });
-      scrollToBottom();
-    };
-
-    const clearLogs = () => {
-      logs.value = [];
-    };
+    const logs = ref<Log[]>(props.logs);
 
     const scrollToBottom = () => {
       nextTick(() => {
@@ -54,10 +38,12 @@ export default defineComponent({
       });
     };
 
+    watch(logs, () => {
+      scrollToBottom();
+    });
+
     return {
       logs,
-      addLog,
-      clearLogs,
     };
   },
 });
@@ -67,7 +53,7 @@ export default defineComponent({
 .console-container {
   display: flex;
   flex-direction: column;
-  height: 290px;
+  height: 270px;
   background-color: #1e1e1e;
   color: #d4d4d4;
   border-radius: 10px 10px 0 0;

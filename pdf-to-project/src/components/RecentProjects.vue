@@ -1,15 +1,13 @@
 <template>
     <v-col class="project-container" cols="3">
-      <v-row
-          class="title"
-      >
+      <v-row class="title">
         <span>Recente Projecten</span>
       </v-row>
       <v-col class="scrollable-container">
       <v-row
-          v-for="project in this.projects"
+          v-for="(project, index) in this.projects"
           :key="project.getId()"
-          class="project-row"
+          :class="['project-row', { 'no-bottom-border': index === this.amount - 1 }]"
       >
         <span class="project-name-text">{{ project.getName() }}</span>
         <i @click="this.openProject(project.getId())" class="material-icons icon-button">open_in_new</i>
@@ -22,10 +20,16 @@
 import { ref, defineComponent, onMounted } from "vue";
 import ProjectController from '@/controller/ProjectController';
 import Project from '@/entity/Project';
-import { shell } from 'electron';
+
 export default defineComponent({
   name: "RecentProjects",
-  setup() {
+  props: {
+    amount: {
+      type: Number,
+      default: 10,
+    },
+  },
+  setup(props) {
       let projects = ref<Project[]>([]);
       const projectController = new ProjectController();
       const openProject = (projectId: number) => {
@@ -33,7 +37,7 @@ export default defineComponent({
         window.electron.openExternal(url);
       };
       onMounted(async () => {
-        projects.value = await projectController.listProjects(10);
+        projects.value = await projectController.listProjects(props.amount);
       });
 
       return {
@@ -47,7 +51,9 @@ export default defineComponent({
 .project-container {
   padding: 0 !important;
   padding-right: 8px !important;
-  height: 560px;
+  height: 548px;
+  background: white;
+  border-radius: 8px;
 }
 .scrollable-container {
   padding: 16px 16px 16px 20px;
@@ -56,12 +62,16 @@ export default defineComponent({
   overflow-y: clip;
 }
 .project-row {
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid #90a4ae;
   direction: ltr;
   align-items: center;
   max-height: 50px;
   padding: 5px 5px 5px 0;
   gap: 4px;
+}
+
+.no-bottom-border {
+  border-bottom: none;
 }
 
 .icon-button {
@@ -88,7 +98,7 @@ export default defineComponent({
 
 .title {
   border-bottom: 2px solid #888888;
-  margin: 0;
+  margin: 0 0 0 4px;
   padding: 10px 4px 4px 4px;
   align-items: center;
   justify-content: center;
