@@ -5,6 +5,12 @@ import 'vuetify/styles';
 import dotenv from "dotenv";
 import fs from "fs";
 import nodemailer from "nodemailer";
+import {getDocument, GlobalWorkerOptions} from "pdfjs-dist";
+import {pathToFileURL} from "url";
+
+// Convert the local path to a valid file:// URL
+const workerPath = pathToFileURL(path.join(__dirname, '../../node_modules/pdfjs-dist/build/pdf.worker.mjs')).href;
+GlobalWorkerOptions.workerSrc = workerPath;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -130,4 +136,22 @@ ipcMain.handle('send-email', async (_event, from, to, path, name, client_id, cli
       console.log('Email sent:', info.response);
     }
   });
+});
+
+ipcMain.handle('text-from-pdf', async (_event, buffer) => {
+    const pdf = getDocument(buffer);
+    return pdf.promise.then(async (pdf) => {
+      const totalPageCount = pdf.numPages;
+      const textPromises = [];
+
+      for (let currentPage = 1; currentPage <= totalPageCount; currentPage++) {
+        const page = await pdf.getPage(currentPage);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        textPromises.push(pageText);
+      }
+
+      const allText = textPromises.join(' ');
+      return allText.split(/\s+/);
+    });
 });

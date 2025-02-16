@@ -38,8 +38,16 @@ export default defineComponent({
     let currentStep = ref<number>(0);
     let totalSteps = ref<number>(10);
     let logs = ref([]);
+    const saveProject = async () => {
+      if (!file.value) return;
+      const text = await window.electron.textFromPdf(await file.value.arrayBuffer());
+      logs.value.push({type: "info", message: "Text extracted from PDF"});
+    };
     const setFile = (newFile: File) => {
+      logs.value = [];
       file.value = newFile;
+      logs.value.push({type: "info", message: "File loaded successfully"});
+      saveProject();
     };
     return {
       file,
