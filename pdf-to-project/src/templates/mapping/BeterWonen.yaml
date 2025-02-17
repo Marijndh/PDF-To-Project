@@ -1,0 +1,43 @@
+name: Beter Wonen
+# Abbreviation
+abb: BW
+# Shows if the text belongs to this client
+identifier: opdrachtbon
+# The attributes of a project mapped to a identifier in the pdf
+project-attributes:
+- name:
+    value: BW {streetName} {houseNumber} {city}
+    type: S
+- streetName:
+    identifier: \b\d{4}\b && ^[A-Z]{2}$
+    range: -3|-3
+    type: S
+- houseNumber:
+    identifier: \b\d{4}\b && ^[A-Z]{2}$
+    range: -2|-2
+    type: S
+- zipCode:
+    identifier: \b\d{4}\b && ^[A-Z]{2}$
+    range: 0|1
+    type: R
+- city:
+    identifier: \b\d{4}\b && ^[A-Z]{2}$
+    range: 2|2
+    type: S
+- information:
+    identifier: omschrijving
+    range: 1|X
+    type: S
+- customAttributeValues:
+    - phone:
+        identifier: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
+        range: 0|0
+        type: R
+    - email:
+        identifier: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+        range: 0|0
+        type: R
+- reference:
+    identifier: ^\d{4}\.\d{3}\.\d{1}$
+    range: 0|0
+    type: R

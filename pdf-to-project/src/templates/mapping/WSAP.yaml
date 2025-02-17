@@ -1,0 +1,43 @@
+name:
+# Abbreviation
+abb:
+# Shows if the text belongs to this client
+identifier:
+# The attributes of a project mapped to a identifier in the pdf
+project-attributes:
+  - name:
+      value: f'WSAP {project["streetName"]} {project["houseNumber"]} {project["city"]}'
+      type: F
+  - streetName:
+      identifier: Object && \d+
+      range: object+2|-1
+      type: S && R
+  - houseNumber:
+      identifier: Object && \d+
+      range: 0|0
+      type: S && R
+  - zipCode:
+      identifier: Object && \b\d{4}\b && ^[A-Z]{2}$
+      range: 0|1
+      type: S && R
+  - city:
+      identifier: Object && ,
+      range: 1|1
+      type: S && S
+  - information:
+      identifier: Opdracht
+      range: 1|datum
+      type: S
+  - customAttributeValues:
+      - phone:
+          identifier: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
+          range: 0|0
+          type: R
+      - email:
+          identifier: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+          range: 0|0
+          type: R
+  - reference:
+      identifier: \d{4}\s/\s\d\s/\s\d
+      range: 0|0
+      type: R

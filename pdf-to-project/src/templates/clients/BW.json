@@ -1,0 +1,56 @@
+{
+  "type": 0,
+  "division": {
+    "id": 2007,
+    "salesInvoiceNumberPrefix": "01"
+  },
+  "name": "",
+  "streetName": "",
+  "houseNumber": "",
+  "zipCode": "",
+  "city": "",
+  "countryCode": "NL",
+  "information": "",
+  "branch": {
+    "id": 3608,
+    "division": {
+      "id": 2007,
+      "salesInvoiceNumberPrefix": "01"
+    }
+  },
+  "contact": {
+    "id": "2227585",
+    "contactType": {
+      "id": 0
+    }
+  },
+  "category": {
+    "id": 32514
+  },
+  "employees": [{"id": 128434}],
+  "status": {
+    "id": 55605
+  },
+  "customAttributeValues": [
+    {
+      "customAttribute": {
+        "id": 12679
+      },
+      "value": ""
+    },
+    {
+      "customAttribute": {
+        "id": 12680
+      },
+      "value": ""
+    }
+  ],
+  "reference": "",
+  "workAddress": "",
+  "projectLeader": {
+    "id": 128345,
+    "firstName": "Dennis",
+    "lastName": "den Hollander",
+    "avatarFileHash": "240ef36c-88e9-4429-8dce-10acd636ba70"
+  }
+}
