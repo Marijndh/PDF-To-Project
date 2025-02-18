@@ -29,8 +29,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const logs = ref<Log[]>(props.logs);
-
     const scrollToBottom = () => {
       nextTick(() => {
         const container = document.querySelector(".console-output");
@@ -38,13 +36,9 @@ export default defineComponent({
       });
     };
 
-    watch(logs, () => {
+    watch(props.logs, () => {
       scrollToBottom();
     });
-
-    return {
-      logs,
-    };
   },
 });
 </script>
@@ -90,7 +84,7 @@ export default defineComponent({
   color: #5cff88;
 }
 
-.log-prefix.warn {
+.log-prefix.warning {
   color: #ffa500;
 }
 </style>

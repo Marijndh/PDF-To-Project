@@ -16,10 +16,10 @@
         </v-row>
         <v-row class="button-row">
           <v-btn @click="this.$emit('file-accepted', this.file)">
-            <i class="material-icons">check</i>
+            <i class="material-symbols-outlined">check</i>
           </v-btn>
           <v-btn  @click="this.deleteFile">
-            <i class="material-icons">delete</i>
+            <i class="material-symbols-outlined">delete</i>
           </v-btn>
         </v-row>
       </v-col>

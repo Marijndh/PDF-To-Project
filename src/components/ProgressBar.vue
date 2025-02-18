@@ -1,16 +1,34 @@
 <template>
-  <v-row class="progress-bar-container">
-    <!-- Title and Loading Spinner -->
+  <v-row
+      v-if="!this.projectCreated === null"
+      class="progress-bar-container"
+  >
     <div class="spinner-container">
       <div class="spinner"></div>
     </div>
-
-    <!-- Progress Bar -->
     <div class="progress-bar">
       <div
           class="progress-bar-fill"
           :style="{ width: this.progressPercentage + '%' }"
       ></div>
+    </div>
+  </v-row>
+  <v-row
+      v-else-if="this.projectCreated !== null"
+      class="progress-bar-container"
+  >
+    <div class="spinner-container">
+      <div v-if="this.projectCreated">
+        <span class="material-symbols-outlined text-green icon">done_outline</span>
+      </div>
+      <div v-else>
+        <span class="material-symbols-outlined text-red icon">block</span>
+      </div>
+    </div>
+    <div>
+      <v-btn @click="this.$emit('reset-refs')">
+        <span class="material-symbols-outlined">redo</span>
+      </v-btn>
     </div>
   </v-row>
 </template>
@@ -31,6 +49,11 @@ export default defineComponent({
       required: true,
       default: 1,
     },
+    projectCreated: {
+      type: Boolean,
+      required: false,
+      default: null,
+    }
   },
   setup(props) {
     // Compute the progress percentage
@@ -105,5 +128,9 @@ export default defineComponent({
   100% {
     transform: rotate(360deg);
   }
+}
+
+.icon {
+  font-size: 130px;
 }
 </style>

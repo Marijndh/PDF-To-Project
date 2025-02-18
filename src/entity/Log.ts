@@ -1,17 +1,19 @@
+export type LogType = "info" | "error" | "success" | "warning";
+
 export class Log {
   private readonly message: string;
-    private readonly type: "info" | "error" | "success" | "warn";
+  private readonly type: LogType;
 
-  constructor(message: string, type: "info" | "error" | "success" | "warn") {
+  constructor(type: string, message: string) {
     this.message = message;
-    this.type = type;
+    this.type = ["info", "error", "success", "warning"].includes(type) ? (type as LogType) : "info";
   }
 
   public getMessage(): string {
     return this.message;
   }
 
-  public getType(): "info" | "error" | "success" | "warn" {
+  public getType(): LogType {
     return this.type;
   }
 }

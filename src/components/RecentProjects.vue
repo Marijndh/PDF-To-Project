@@ -10,14 +10,14 @@
           :class="['project-row', { 'no-bottom-border': index === this.amount - 1 }]"
       >
         <span class="project-name-text">{{ project.getName() }}</span>
-        <i @click="this.openProject(project.getId())" class="material-icons icon-button">open_in_new</i>
+        <i @click="this.openProject(project.getId())" class="material-symbols-outlined icon-button">open_in_new</i>
       </v-row>
     </v-col>
     </v-col>
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, onMounted } from "vue";
+import {ref, defineComponent, onMounted, watch} from "vue";
 import ProjectController from '@/controller/ProjectController';
 import Project from '@/entity/Project';
 
@@ -28,6 +28,11 @@ export default defineComponent({
       type: Number,
       default: 10,
     },
+    projectCreated: {
+      type: Boolean,
+      required: false,
+      default: null,
+    }
   },
   setup(props) {
       let projects = ref<Project[]>([]);
@@ -37,8 +42,18 @@ export default defineComponent({
         window.electron.openExternal(url);
       };
       onMounted(async () => {
-        projects.value = await projectController.listProjects(props.amount);
+        setProjects();
       });
+
+      watch(() => props.projectCreated, async (createdProject) => {
+        if (createdProject) {
+          setProjects()
+        }
+      });
+
+      const setProjects = async () => {
+        projects.value = await projectController.listProjects(props.amount);
+      }
 
       return {
         projects,

@@ -1,43 +1,43 @@
 name:
 # Abbreviation
-abb:
+abbreviation:
 # Shows if the text belongs to this client
 identifier:
 # The attributes of a project mapped to a identifier in the pdf
-project-attributes:
-  - name:
-      value:
-      type:
-  - streetName:
+projectAttributes:
+  name:
+    value:
+    type:
+  streetName:
+    identifier:
+    range:
+    type:
+  houseNumber:
+    identifier:
+    range:
+    type:
+  zipCode:
+    identifier:
+    range:
+    type:
+  city:
+    identifier:
+    range:
+    type:
+  information:
+    identifier:
+    range:
+    type:
+  customAttributeValues:
+    phone:
       identifier:
       range:
       type:
-  - houseNumber:
+    email:
       identifier:
       range:
       type:
-  - zipCode:
-      identifier:
-      range:
-      type:
-  - city:
-      identifier:
-      range:
-      type:
-  - information:
-      identifier:
-      range:
-      type:
-  - customAttributeValues:
-      - phone:
-          identifier:
-          range:
-          type:
-      - email:
-          identifier:
-          range:
-          type:
-  - reference:
-      identifier:
-      range:
-      type:
+  reference:
+    identifier:
+    range:
+    type:

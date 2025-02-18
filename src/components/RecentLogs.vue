@@ -12,15 +12,14 @@
           :class="['log-row', { 'no-bottom-border': index === this.amount - 1 }]"
       >
         <span class="log-name">{{ log.getName() }}</span>
-        <i @click="log.open()" class="material-icons icon-button">open_in_new</i>
-        <i @click="log.sendEmail()" class="material-icons icon-button">mail</i>
+        <i @click="log.sendEmail()" class="material-symbols-outlined icon-button">mail</i>
       </v-row>
     </v-col>
   </v-col>
 </template>
 
 <script lang="ts">
-import {defineComponent, onMounted, ref} from "vue";
+import {defineComponent, onMounted, ref, watch} from "vue";
 import LogFile from "@/entity/LogFile";
 
 export default defineComponent({
@@ -30,24 +29,35 @@ export default defineComponent({
       type: Number,
       default: 10,
     },
+    projectCreated: {
+      type: Boolean,
+      required: false,
+      default: null,
+    }
+
   },
   setup(props) {
     let logs = ref<LogFile[]>([]);
-    const sendEmail = async (path: string, filename: string) => {
-      await window.electron.sendEmail(path, filename, undefined, undefined, undefined, client_secret, refresh_token, access_token);
-    };
 
     onMounted(async () => {
-      let logsAndDir = await window.electron.getLogs(props.amount);
-      const dir = logsAndDir['dir'];
-      logs.value = logsAndDir['files'].map((file: string) => {
-        return new LogFile(file, dir);
-      });
+      setLogs();
     });
+
+    watch(() => props.projectCreated, async (newValue) => {
+      if (newValue) {
+        setLogs();
+      }
+    });
+
+    const setLogs = async () => {
+      let fetchedLogs = await window.electron.getLogs(props.amount);
+      logs.value = fetchedLogs.map(log => {
+        return new LogFile(log.name, log.path);
+      });
+    }
 
     return {
       logs,
-      sendEmail,
     };
   },
 });
@@ -80,6 +90,7 @@ export default defineComponent({
   cursor: pointer;
   color: #000000;
   transition: transform 0.2s ease-in-out;
+  margin-left: 5px;
 }
 
 .icon-button:active {
@@ -87,7 +98,7 @@ export default defineComponent({
 }
 
 .log-name {
-  width: 70%;
+  width: 80%;
   overflow: clip;
   height: 40px;
   font-size: 13px;

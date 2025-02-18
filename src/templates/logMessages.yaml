@@ -1,0 +1,35 @@
+textExtraction:
+  - type: "info"
+    message: "Text extracted from PDF"
+  - type: "error"
+    message: "No text extracted from PDF"
+findClient:
+  - type: "info"
+    message: "Client found"
+  - type: "error"
+    message: "Client not found"
+findTemplate:
+  - type: "info"
+    message: "Template found"
+  - type: "error"
+    message: "Template not found"
+setProjectValues:
+  - type: "info"
+    message: "Project values set"
+  - type: "error"
+    message: "Failed to set project values"
+insertProjectIntoTemplate:
+  - type: "info"
+    message: "Project inserted into template"
+  - type: "error"
+    message: "Failed to insert project into template"
+createProject:
+  - type: "success"
+    message: "Project created successfully"
+  - type: "error"
+    message: "Failed to create project"
+logData:
+  - type: "info"
+    message: "Data logged"
+  - type: "warning"
+    message: "Failed to log data"
