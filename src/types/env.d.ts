@@ -1,7 +1,5 @@
 interface ImportMetaEnv {
-    readonly VITE_EMAIL_FROM: string;
     readonly VITE_EMAIL_TO: string;
-    readonly VITE_EMAIL_PASSWORD: string;
     readonly VITE_API_URL: string;
     readonly VITE_API_TOKEN: string;
     readonly VITE_API_KEY: string;
@@ -10,7 +8,7 @@ interface ImportMetaEnv {
     readonly VITE_GOOGLE_CLIENT_SECRET: string;
     readonly VITE_GOOGLE_REFRESH_TOKEN: string;
     readonly VITE_GOOGLE_ACCESS_TOKEN: string;
-    readonly VITE_PROJECT_URL: string;
+    readonly VITE_GOOGLE_REDIRECT_URI: string;
 }
 
 interface ImportMeta {

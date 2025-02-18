@@ -7,6 +7,10 @@ import fs from "fs";
 import nodemailer from "nodemailer";
 import {getDocument, GlobalWorkerOptions} from "pdfjs-dist";
 import {pathToFileURL} from "url";
+import { OAuth2Client } from 'google-auth-library';
+import { gmail } from 'googleapis/build/src/apis/gmail';
+import http from "http";
+import express from "express";
 
 // Convert the local path to a valid file:// URL
 const workerPath = pathToFileURL(path.join(__dirname, '../../node_modules/pdfjs-dist/build/pdf.worker.mjs')).href;
@@ -18,6 +22,115 @@ if (started) {
 }
 
 dotenv.config();
+
+const oauth2Client = new OAuth2Client(
+    import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
+    import.meta.env.VITE_GOOGLE_REDIRECT_URI
+);
+
+let serverStarted = false; // Flag to track if the server is already started
+
+// Start the express server only when needed
+function startServer() {
+  if (serverStarted) {
+    return; // Don't start the server if it's already running
+  }
+  const server = express();
+  const port = 3000; // Port to listen on for the callback
+
+  const serverInstance = http.createServer(server);
+  serverInstance.listen(port, () => {
+    console.log(`Server started at http://localhost:${port}`);
+    serverStarted = true; // Mark the server as started
+  });
+
+  // Set up the callback route
+  server.get("/auth/google/callback", async (req, res) => {
+    const { code } = req.query;
+
+    if (code) {
+      try {
+        // Exchange the authorization code for tokens
+        const { tokens } = await oauth2Client.getToken(code as string);
+        oauth2Client.setCredentials(tokens);
+
+        // Save tokens to tokens.json or your preferred storage
+        saveTokens(tokens);
+
+        // Respond to the browser that authentication was successful
+        res.send("Authentication successful! You can now close this page.");
+      } catch (error) {
+        console.error("Error exchanging code for tokens:", error);
+        res.send("Authentication failed. Please try again.");
+      }
+    } else {
+      res.send("No authorization code received.");
+    }
+  });
+}
+
+// Fetch user's email address using the Google API
+async function getUserEmail() {
+  try {
+    const oauth2ClientCredentials = oauth2Client.credentials;
+    if (!oauth2ClientCredentials.access_token) {
+      throw new Error('No access token found!');
+    }
+
+    const gmailSession = gmail({ version: 'v1', auth: oauth2Client });
+    const res = await gmailSession.users.getProfile({ userId: 'me' });
+
+    return res.data.emailAddress;
+  } catch (error) {
+    console.error('Error fetching user email:', error);
+    throw error; // Re-throw error for handling in other parts of the code
+  }
+}
+
+const fetchTokens = () => {
+  const tokensPath = path.resolve(process.cwd(), "tokens.json");
+  try {
+    const tokenData = fs.readFileSync(tokensPath, "utf-8");
+    const parsedTokens = JSON.parse(tokenData);
+    oauth2Client.setCredentials(parsedTokens);
+  } catch (error) {
+    console.error("Error loading tokens:", error);
+  }
+}
+
+const saveTokens = (tokens: any) => {
+  const tokensPath = path.resolve(process.cwd(), "tokens.json");
+
+  // Create an object to store the tokens
+  const tokenData = {
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token,
+    expires_in: tokens.expires_in,
+    scope: tokens.scope,
+    token_type: tokens.token_type,
+    expiry_date: tokens.expiry_date,
+  };
+  oauth2Client.setCredentials(tokenData);
+
+  try {
+    fs.writeFileSync(tokensPath, JSON.stringify(tokenData, null, 2));
+  } catch (error) {
+    console.error("Error saving tokens:", error);
+  }
+}
+
+const getNewAccessToken = () => {
+  startServer();
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: ["https://mail.google.com/"],
+    prompt: "consent",
+  });
+
+  console.log(`Opening this URL in the default browser: ${authUrl}`);
+  shell.openExternal(authUrl); // Open the URL automatically in the default browser
+}
 
 const createWindow = () => {
   // Create the browser window.
@@ -48,14 +161,8 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -63,8 +170,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
@@ -78,8 +183,7 @@ ipcMain.on("update-token", (event, token) => {
     const updatedEnvContent = envContent.replace(/API_TOKEN=.*/g, `API_TOKEN=${token}`);
     fs.writeFileSync(envPath, updatedEnvContent);
 
-    dotenv.config(); // Reload environment variables
-    console.log("Token updated successfully!");
+    dotenv.config();
   } catch (error) {
     console.error("Failed to update token:", error);
   }
@@ -116,26 +220,26 @@ ipcMain.handle('open-file', async (_event, path) => {
 });
 
 ipcMain.handle('send-email', async (_event,directory, name) => {
-  const from: string = import.meta.env.VITE_EMAIL_FROM;
-  const to: string = import.meta.env.VITE_EMAIL_TO;
-  const client_id: string = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const client_secret: string = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
-  const refresh_token: string = import.meta.env.VITE_GOOGLE_REFRESH_TOKEN;
-  const access_token: string = import.meta.env.VITE_GOOGLE_ACCESS_TOKEN;
+  fetchTokens();
+
+  if (!oauth2Client.credentials.access_token) {
+    console.log("No access token found, requesting authentication...");
+    getNewAccessToken();
+    return;
+  }
+
+  const userEmail = await getUserEmail();
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    service: "gmail",
     auth: {
       type: "OAuth2",
-      user: from,
-      clientId: client_id,
-      clientSecret: client_secret,
-      refreshToken: refresh_token,
-      accessToken: access_token,
-      expires: 0,
-    }
+      user: userEmail,
+      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      clientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
+      refreshToken: oauth2Client.credentials.refresh_token,
+      accessToken: oauth2Client.credentials.access_token!,
+    },
   });
 
   const files = fs.readdirSync(directory);
@@ -148,16 +252,23 @@ ipcMain.handle('send-email', async (_event,directory, name) => {
   }
 
   const mailOptions = {
-    from: from,
-    to: to,
+    from: userEmail,
+    to: import.meta.env.VITE_EMAIL_TO,
     subject: 'Log-File: ' + name,
     text: txtFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf-8')).join('\n\n'),
     attachments: attachments.map(file => ({filename: file, path: path.join(directory, file)})),
   };
 
+  console.log(mailOptions);
+
   transporter.sendMail(mailOptions, (error: any, info: any) => {
     if (error) {
-      console.error('Error sending email:', error);
+      if (error.code === "EAUTH") {
+        console.log("Access token expired, requesting new authentication...");
+        console.log(error)
+        getNewAccessToken();
+      }
+      else console.error('Error sending email:', error);
     } else {
       console.log('Email sent:', info.response);
     }
