@@ -38,7 +38,7 @@ import FeedbackConsole from '@/components/FeedbackConsole.vue';
 import ProjectExtractor from "@/utils/ProjectExtractor";
 import ProjectController from "@/controller/ProjectController";
 import StepExecutor from "@/utils/StepExecutor";
-import {Log} from "@/entity/Log";
+import {LogLine} from "@/entity/LogLine";
 
 export default defineComponent({
   name: "MainComponent",
@@ -47,14 +47,14 @@ export default defineComponent({
     let file = ref<File>(null);
     let currentStep = ref<number>(1);
     let totalSteps = ref<number>(1);
-    let logs = ref<Array<Log>>([]);
+    let logs = ref<Array<LogLine>>([]);
     let createdProject = ref<boolean>(null);
 
     onMounted(async () => {
       const buffer = await window.electron.getTestFile();
       file.value = new File([buffer], "test-file.pdf", { type: "application/pdf" });
       if (file.value) {
-        logs.value.push(new Log("info", "Test file loaded successfully"));
+        logs.value.push(new LogLine("info", "Test file loaded successfully"));
         saveProject();
       }
     });
@@ -80,23 +80,21 @@ export default defineComponent({
         return projectExtractor.fetchTemplate();
       });
 
-      stepExecutor.addStep('setProjectValues', () => {
-        projectExtractor.setProjectValues();
-        return Promise.resolve(true);
+      stepExecutor.addStep('fetchProjectAttributes', () => {
+        return projectExtractor.fetchProjectAttributes();
       });
 
-      stepExecutor.addStep('insertProjectIntoTemplate', () => {
-        projectExtractor.insertProjectIntoTemplate();
-        return Promise.resolve(true);
+      stepExecutor.addStep('fillTemplate', () => {
+        return projectExtractor.fillTemplate();
       });
 
       stepExecutor.addStep('createProject', () => {
-        //return projectController.create(projectExtractor.getProjectData());
+        //return projectController.create(projectExtractor.getTemplate());
         return Promise.resolve(true);
       });
 
       stepExecutor.addStep('logData',async () => {
-        return projectExtractor.logData(logs.value, file.value);
+        return projectExtractor.createLog(logs.value, file.value);
       });
 
       totalSteps.value = stepExecutor.getTotalSteps();
@@ -113,7 +111,7 @@ export default defineComponent({
     const setFile = (newFile: File) => {
       logs.value = [];
       file.value = newFile;
-      logs.value.push(new Log("info", "File loaded successfully"));
+      logs.value.push(new LogLine("info", "File loaded successfully"));
       saveProject();
 
     };

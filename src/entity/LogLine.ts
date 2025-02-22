@@ -1,6 +1,6 @@
 export type LogType = "info" | "error" | "success" | "warning";
 
-export class Log {
+export class LogLine {
   private readonly message: string;
   private readonly type: LogType;
 

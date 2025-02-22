@@ -6,38 +6,34 @@ identifier: opdrachtbon
 # The attributes of a project mapped to a identifier in the pdf
 projectAttributes:
   name:
-    value: BW {streetName} {houseNumber} {city}
-    type: S
+    identifier: BW {streetName} {houseNumber} {city}
+    type: F
   streetName:
     identifier: \b\d{4}\b && ^[A-Z]{2}$
-    range: -3|-3
-    type: S
+    range: -2
+    type: R
   houseNumber:
     identifier: \b\d{4}\b && ^[A-Z]{2}$
-    range: -2|-2
-    type: S
+    range: -1
+    type: R
   zipCode:
     identifier: \b\d{4}\b && ^[A-Z]{2}$
     range: 0|1
     type: R
   city:
     identifier: \b\d{4}\b && ^[A-Z]{2}$
-    range: 2|2
-    type: S
+    range: 2
+    type: R
   information:
     identifier: omschrijving
     range: 1|X
     type: S
-  customAttributeValues:
-    phone:
-        identifier: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
-        range: 0|0
-        type: R
-    email:
-        identifier: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-        range: 0|0
-        type: R
+  phone:
+    identifier: ^(\d-?){10,}$
+    type: R
+  email:
+    identifier: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+    type: R
   reference:
     identifier: ^\d{4}\.\d{3}\.\d{1}$
-    range: 0|0
     type: R

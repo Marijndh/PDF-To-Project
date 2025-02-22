@@ -13,12 +13,12 @@ findTemplate:
     message: "Template found"
   - type: "error"
     message: "Template not found"
-setProjectValues:
+fetchProjectAttributes:
   - type: "info"
     message: "Project values set"
   - type: "error"
     message: "Failed to set project values"
-insertProjectIntoTemplate:
+fillTemplate:
   - type: "info"
     message: "Project inserted into template"
   - type: "error"

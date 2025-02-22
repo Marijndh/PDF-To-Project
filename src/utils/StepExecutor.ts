@@ -1,13 +1,13 @@
-import {Log} from "@/entity/Log";
+import {LogLine} from "@/entity/LogLine";
 import Step from "@/entity/Step";
 
 export default class StepExecutor {
     private steps: Array<Step> = [];
     private currentStep: number;
-    private logs: Array<Log>;
-    private logMessages: Record<string, Array<Log>>;
+    private logs: Array<LogLine>;
+    private logMessages: Record<string, Array<LogLine>>;
 
-    constructor(logs: Array<Log>, currentStep: number) {
+    constructor(logs: Array<LogLine>, currentStep: number) {
         this.logs = logs;
         this.currentStep = currentStep;
     }
@@ -16,10 +16,10 @@ export default class StepExecutor {
         const logJson = await window.electron.getLogMessages();
         this.logMessages = Object.entries(logJson).reduce((acc, [key, value]) => {
             acc[key] = (value as Array<{ type: string; message: string }>).map(
-                (log) => new Log(log.type, log.message)
+                (log) => new LogLine(log.type, log.message)
             );
             return acc;
-        }, {} as Record<string, Array<Log>>);
+        }, {} as Record<string, Array<LogLine>>);
 
         return Object.keys(this.logMessages).length;
     }
@@ -36,7 +36,7 @@ export default class StepExecutor {
         if (this.logMessages[name] && Array.isArray(this.logMessages[name]) && this.logMessages[name].length === 2) {
             this.steps.push(new Step(name, stepFunction, this.logMessages[name]));
         } else {
-            this.logs.push(new Log("error", `Step ${name} not found in log messages`));
+            this.logs.push(new LogLine("error", `Step ${name} not found in log messages`));
         }
     }
 
@@ -52,7 +52,7 @@ export default class StepExecutor {
                     this.logs.push(step.getSuccessLog());
                 }
             } catch (error) {
-                this.logs.push(new Log("error", `Step ${this.currentStep} failed with error: ${error.message}`));
+                this.logs.push(new LogLine("error", `Step ${this.currentStep} failed with error: ${error.message}`));
                 return false;
             }
         }

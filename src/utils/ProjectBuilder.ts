@@ -42,8 +42,8 @@ class ProjectBuilder {
         return this;
     }
 
-    public setPhoneNumber(phoneNumber: string): ProjectBuilder {
-        this.project.setPhoneNumber(phoneNumber);
+    public setPhone(phoneNumber: string): ProjectBuilder {
+        this.project.setPhone(phoneNumber);
         return this;
     }
 

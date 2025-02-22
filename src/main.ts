@@ -254,7 +254,7 @@ ipcMain.handle('send-email', async (_event,directory, name) => {
   const mailOptions = {
     from: userEmail,
     to: import.meta.env.VITE_EMAIL_TO,
-    subject: 'Log-File: ' + name,
+    subject: 'LogLine-File: ' + name,
     text: txtFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf-8')).join('\n\n'),
     attachments: attachments.map(file => ({filename: file, path: path.join(directory, file)})),
   };
@@ -322,7 +322,9 @@ ipcMain.handle('get-test-file', async () => {
 });
 
 ipcMain.handle('get-template', async (_event, abbreviation) => {
-  return readFileContent(`src/templates/clients/${abbreviation}.json`, 'json');
+  const template = readFileContent(`src/templates/clients/${abbreviation}.json`, 'json');
+  console.log(template)
+  return template;
 });
 
 ipcMain.handle('get-log-messages', async () => {

@@ -1,12 +1,12 @@
-import { Log } from "@/entity/Log";
+import { LogLine } from "@/entity/LogLine";
 
 export default class Step {
     private name: string;
     private stepFunction: () => Promise<boolean>;
-    private successLog: Log;
-    private errorLog: Log;
+    private successLog: LogLine;
+    private errorLog: LogLine;
 
-    constructor(name: string, stepFunction: () => Promise<boolean>, logMessages: Array<Log>) {
+    constructor(name: string, stepFunction: () => Promise<boolean>, logMessages: Array<LogLine>) {
         this.name = name;
         this.stepFunction = stepFunction;
         this.successLog = logMessages[0];
@@ -21,11 +21,11 @@ export default class Step {
         return this.name;
     }
 
-    public getSuccessLog(): Log {
+    public getSuccessLog(): LogLine {
         return this.successLog;
     }
 
-    public getErrorLog(): Log {
+    public getErrorLog(): LogLine {
         return this.errorLog;
     }
 }

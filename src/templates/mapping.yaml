@@ -6,7 +6,7 @@ identifier:
 # The attributes of a project mapped to a identifier in the pdf
 projectAttributes:
   name:
-    value:
+    identifier:
     type:
   streetName:
     identifier:
@@ -28,15 +28,14 @@ projectAttributes:
     identifier:
     range:
     type:
-  customAttributeValues:
-    phone:
-      identifier:
-      range:
-      type:
-    email:
-      identifier:
-      range:
-      type:
+  phone:
+    identifier:
+    range:
+    type:
+  email:
+    identifier:
+    range:
+    type:
   reference:
     identifier:
     range:

@@ -17,15 +17,15 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch, nextTick, PropType } from "vue";
-import {Log} from "@/entity/Log";
+import {LogLine} from "@/entity/LogLine";
 
 
 export default defineComponent({
   name: "ConsoleComponent",
   props: {
     logs: {
-      type: Array as PropType<Log[]>,
-      default: () => [] as PropType<Log[]>,
+      type: Array as PropType<LogLine[]>,
+      default: () => [] as PropType<LogLine[]>,
     },
   },
   setup(props) {

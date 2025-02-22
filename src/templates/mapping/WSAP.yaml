@@ -6,7 +6,7 @@ identifier:
 # The attributes of a project mapped to a identifier in the pdf
 projectAttributes:
   name:
-    value: f'WSAP {project["streetName"]} {project["houseNumber"]} {project["city"]}'
+    identifier: f'WSAP {project["streetName"]} {project["houseNumber"]} {project["city"]}'
     type: F
   streetName:
     identifier: Object && \d+
@@ -28,15 +28,14 @@ projectAttributes:
     identifier: Opdracht
     range: 1|datum
     type: S
-  customAttributeValues:
-    phone:
-      identifier: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
-      range: 0|0
-      type: R
-    email:
-      identifier: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-      range: 0|0
-      type: R
+  phone:
+    identifier: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
+    range: 0|0
+    type: R
+  email:
+    identifier: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    range: 0|0
+    type: R
   reference:
     identifier: \d{4}\s/\s\d\s/\s\d
     range: 0|0

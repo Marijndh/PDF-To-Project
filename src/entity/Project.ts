@@ -46,7 +46,7 @@ class Project {
         return this;
     }
 
-    public setPhoneNumber(phoneNumber: string): Project {
+    public setPhone(phoneNumber: string): Project {
         this.customAttributeValues[0] = phoneNumber;
         return this;
     }
@@ -71,6 +71,32 @@ class Project {
 
     public getId(): number {
         return this.id;
+    }
+    public getAttributeValue(attribute: string): string | undefined {
+        switch (attribute) {
+            case 'id':
+                return String(this.id);
+            case 'name':
+                return this.name;
+            case 'streetName':
+                return this.streetName;
+            case 'houseNumber':
+                return this.houseNumber;
+            case 'zipCode':
+                return this.zipCode;
+            case 'city':
+                return this.city;
+            case 'information':
+                return this.information;
+            case 'phone':
+                return this.customAttributeValues[0];
+            case 'email':
+                return this.customAttributeValues[1];
+            case 'reference':
+                return this.reference;
+            default:
+                return undefined;
+        }
     }
 }
 export default Project;

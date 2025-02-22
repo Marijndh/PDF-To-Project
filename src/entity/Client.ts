@@ -1,14 +1,19 @@
+import {AttributeIdentifier} from "@/entity/AttributeIdentifier";
+
 export default class Client {
     private name: string;
     private abbreviation: string;
     private identifier: string;
-    private attributeIdentifiers: Record<string, unknown>;
+    private attributeIdentifiers: Array<AttributeIdentifier>;
 
-    constructor(name: string, abbreviation: string, identifier: string, attributeIdentifiers: Record<string, unknown>) {
+    constructor(name: string, abbreviation: string, identifier: string, attributeIdentifiers: Record<string, {identifier: string, type: string, range: string}>) {
         this.name = name;
         this.abbreviation = abbreviation;
         this.identifier = identifier;
-        this.attributeIdentifiers = attributeIdentifiers;
+        this.attributeIdentifiers = Object.keys(attributeIdentifiers).map(key => {
+            const attr = attributeIdentifiers[key];
+            return new AttributeIdentifier(key, attr.identifier, attr.type, attr.range);
+        });
     }
 
     public getName(): string {
@@ -23,7 +28,7 @@ export default class Client {
         return this.identifier;
     }
 
-    public getAttributeIdentifiers(): Record<string, unknown> {
+    public getAttributeIdentifiers(): Array<AttributeIdentifier> {
         return this.attributeIdentifiers;
     }
 }

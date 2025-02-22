@@ -1,16 +1,19 @@
 import ProjectBuilder from "@/utils/ProjectBuilder";
 import Client from "@/entity/Client";
-import {Log} from "@/entity/Log";
+import {LogLine} from "@/entity/LogLine";
+import {AttributeIdentifier} from "@/entity/AttributeIdentifier";
+import Project from "@/entity/Project";
+import projectBuilder from "@/utils/ProjectBuilder";
 
 export default class ProjectExtractor {
     private client: Client;
     private text: Array<string>;
     private template: Record<string, unknown>;
-    private attributeIdentifiers: Record<string, unknown>
-    private projectData: Record<string, unknown>;
     private projectBuilder: ProjectBuilder;
 
-    constructor() {}
+    constructor() {
+        this.projectBuilder = new ProjectBuilder();
+    }
 
     public setText(text: Array<string>): void {
         this.text = text;
@@ -20,9 +23,17 @@ export default class ProjectExtractor {
         return this.text;
     }
 
+    public getClient(): string {
+        return this.client.getName();
+    }
+
+    public getTemplate(): Record<string, unknown> {
+        return this.template;
+    }
+
     public async findClient(): Promise<boolean> {
         const clients = (await window.electron.getClients()).map(
-          (client: any) => new Client(client.name, client.abbreviation, client.identifier, client.attributeIdentifiers)
+            (client: any) => new Client(client.name, client.abbreviation, client.identifier, client.attributeIdentifiers)
         );
         for (const client of clients) {
             const identifierIndex = this.text.findIndex(text => text.toLowerCase() === client.getIdentifier().toLowerCase());
@@ -44,43 +55,95 @@ export default class ProjectExtractor {
         return false;
     }
 
-    private extractValue(identifier: string, range: string, type: string): string | null {
-        if (type === "R" && identifier) {
-            const regex = new RegExp(identifier);
-            const index = this.text.findIndex(word => regex.test(word));
-            if (index !== -1) {
-                const [start, end] = range.split("|").map(Number);
-                return this.text[index + start] || null;
+    private searchValueInText(identifier: string, type: string, range?: string): string | undefined {
+        let index: number;
+
+        if (type === 'R') {
+            const regexes: Array<RegExp> = identifier.split('&&').map(part => new RegExp(part.trim()));
+            index = this.text.findIndex((text, idx) => {
+                return regexes.every((regex, regexIdx) => {
+                    const searchText = this.text[idx + regexIdx];
+                    return searchText && regex.test(searchText);
+               });
+            });
+        } else if (type === 'S') {
+            index = this.text.findIndex(text => text.toLowerCase().includes(identifier.toLowerCase()));
+        } else {
+            return undefined;
+        }
+
+        if (index === -1) {
+            return undefined;
+        }
+
+        if (range) {
+            const [startOffset, endOffset] = typeof range === 'string' && range.includes('|')
+                ? range.split('|').map(offset => offset === 'X' ? (offset === range.split('|')[0] ? 0 : this.text.length - 1) : Number(offset))
+                : [Number(range), Number(range)];
+            const startIndex = index + startOffset;
+            const endIndex = index + endOffset + 1;
+            return this.text.slice(Math.max(0, startIndex), Math.min(this.text.length, endIndex)).join(' ');
+        }
+
+        return this.text[index];
+    }
+
+    private processFStringAttribute(name: string, identifier: string, ): void {
+        const matches = identifier.match(/\{(\w+)\}/g);
+        if (matches) {
+            const currentProject: Project = this.projectBuilder.build();
+            let value = identifier;
+            matches.forEach(match => {
+                const key = match.replace(/[{}]/g, '');
+                const attributeValue = currentProject.getAttributeValue(key);
+                if (attributeValue) {
+                    value = value.replace(match, attributeValue);
+                }
+            });
+            this.setValue(name, value);
+        }
+    }
+
+    private setValue(name: string, value: string, capitalize: boolean = false): void {
+        const finalValue = capitalize ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : value;
+        this.projectBuilder = (this.projectBuilder as any)[`set${name.charAt(0).toUpperCase() + name.slice(1)}`](finalValue);
+    }
+
+    public async fetchProjectAttributes(): Promise<boolean> {
+        const identifiers: Array<AttributeIdentifier> = this.client.getAttributeIdentifiers();
+        identifiers.forEach(attribute => {
+            const value = this.searchValueInText(attribute.getIdentifier(), attribute.getType(), attribute.getRange());
+            const name = attribute.getName();
+            if (value) {
+                this.setValue(name, value, true);
             }
-        } else if (type === "S" && identifier) {
-            const index = this.text.indexOf(identifier);
-            if (index !== -1) {
-                const [start, end] = range.split("|").map(Number);
-                return this.text[index + start] || null;
+        });
+        identifiers.forEach(attribute => {
+            if (attribute.getType() === 'F') {
+                this.processFStringAttribute(attribute.getName(), attribute.getIdentifier());
+            }
+        });
+        return true;
+    }
+
+    public async fillTemplate(): Promise<boolean> {
+        const project: Project = this.projectBuilder.build();
+        for (const key in this.template) {
+            if (this.template.hasOwnProperty(key)) {
+                const newValue = project.getAttributeValue(key);
+                if (newValue !== undefined) {
+                    this.template[key] = newValue;
+                }
             }
         }
-        return null;
+        console.log(this.template);
+        return true
     }
 
-    public setProjectValues(): void {
-
-    }
-
-    public insertProjectIntoTemplate(): void {
-        this.projectData = {};
-    }
-
-    public async logData(logs: Array<Log>, file: File): Promise<boolean> {
+    public async createLog(logs: Array<LogLine>, file: File): Promise<boolean> {
         const messages = logs.map(log => log.getMessage());
         const arrayBuffer = await file.arrayBuffer();
-        return window.electron.createLog(messages, this.text, this.projectData, arrayBuffer);
+        return window.electron.createLog(messages, this.text, this.template, arrayBuffer);
     }
 
-    public getClient(): string {
-        return this.client.getName();
-    }
-
-    public getProjectData(): Record<string, unknown> {
-        return this.projectData;
-    }
 }
