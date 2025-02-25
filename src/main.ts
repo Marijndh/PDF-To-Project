@@ -11,7 +11,7 @@ import {OAuth2Client} from 'google-auth-library';
 import {gmail} from 'googleapis/build/src/apis/gmail';
 import http from "http";
 import express from "express";
-const { autoUpdater } = require("electron-updater");
+import {autoUpdater} from "electron-updater";
 
 // Convert the local path to a valid file:// URL
 const workerPath = pathToFileURL(path.join(__dirname, '../../node_modules/pdfjs-dist/build/pdf.worker.mjs')).href;
@@ -166,9 +166,12 @@ autoUpdater.on("update-available", () => {
   console.log("Update available!");
 });
 
-autoUpdater.on("update-downloaded", () => {
-  console.log("Update downloaded. Restarting app...");
-  autoUpdater.quitAndInstall();
+autoUpdater.on("update-not-available", () => {
+  console.log("No update available.");
+});
+
+autoUpdater.on("error", (err) => {
+  console.error("Update error:", err);
 });
 
 app.on('ready', createWindow);
