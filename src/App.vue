@@ -50,14 +50,14 @@ export default defineComponent({
     let logs = ref<Array<LogLine>>([]);
     let createdProject = ref<boolean>(null);
 
-    onMounted(async () => {
-      const buffer = await window.electron.getTestFile();
-      file.value = new File([buffer], "test-file.pdf", { type: "application/pdf" });
-      if (file.value) {
-        logs.value.push(new LogLine("info", "Test file loaded successfully"));
-        saveProject();
-      }
-    });
+    // onMounted(async () => {
+    //   const buffer = await window.electron.getTestFile();
+    //   file.value = new File([buffer], "test-file.pdf", { type: "application/pdf" });
+    //   if (file.value) {
+    //     logs.value.push(new LogLine("info", "Test file loaded successfully"));
+    //     saveProject();
+    //   }
+    // });
     const saveProject = async () => {
       if (!file.value) return;
       const stepExecutor = new StepExecutor(logs.value, currentStep.value);

@@ -13,9 +13,5 @@ class LogFile {
     public getPath(): string {
         return this.path;
     }
-
-    public async sendEmail(): Promise<void> {
-        await window.electron.sendEmail(this.path, this.name);
-    }
 }
 export default LogFile;

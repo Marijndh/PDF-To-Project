@@ -136,7 +136,6 @@ export default class ProjectExtractor {
                 }
             }
         }
-        console.log(this.template);
         return true
     }
 

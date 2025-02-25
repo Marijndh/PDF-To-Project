@@ -6,7 +6,7 @@ declare global {
             openExternal: (url: string) => Promise<void>;
             getLogs: (amount: number) => Promise<Array<{ name: string, path: string }>>;
             openFile: (path: string) => Promise<void>;
-            sendEmail: (path: string, name: string) => any;
+            sendEmail: (path: string, name: string, message: string) => Promise<void>;
             textFromPdf: (buffer: ArrayBuffer) => Promise<Array<string>>;
             getClients: () => Promise<Array<{ name: string, abbreviation: string, identifier: string, attributeIdentifiers: Record<string, unknown> }>>;
             getTestFile: () => Promise<Buffer>;

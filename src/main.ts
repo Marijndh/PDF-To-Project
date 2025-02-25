@@ -7,8 +7,8 @@ import fs from "fs";
 import nodemailer from "nodemailer";
 import {getDocument, GlobalWorkerOptions} from "pdfjs-dist";
 import {pathToFileURL} from "url";
-import { OAuth2Client } from 'google-auth-library';
-import { gmail } from 'googleapis/build/src/apis/gmail';
+import {OAuth2Client} from 'google-auth-library';
+import {gmail} from 'googleapis/build/src/apis/gmail';
 import http from "http";
 import express from "express";
 
@@ -219,7 +219,7 @@ ipcMain.handle('open-file', async (_event, path) => {
   await shell.openPath(path);
 });
 
-ipcMain.handle('send-email', async (_event,directory, name) => {
+ipcMain.handle('send-email', async (_event,directory, name, message) => {
   fetchTokens();
 
   if (!oauth2Client.credentials.access_token) {
@@ -255,17 +255,14 @@ ipcMain.handle('send-email', async (_event,directory, name) => {
     from: userEmail,
     to: import.meta.env.VITE_EMAIL_TO,
     subject: 'LogLine-File: ' + name,
-    text: txtFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf-8')).join('\n\n'),
+    text: message + '\n\n' + txtFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf-8')).join('\n\n'),
     attachments: attachments.map(file => ({filename: file, path: path.join(directory, file)})),
   };
-
-  console.log(mailOptions);
 
   transporter.sendMail(mailOptions, (error: any, info: any) => {
     if (error) {
       if (error.code === "EAUTH") {
         console.log("Access token expired, requesting new authentication...");
-        console.log(error)
         getNewAccessToken();
       }
       else console.error('Error sending email:', error);
@@ -322,9 +319,7 @@ ipcMain.handle('get-test-file', async () => {
 });
 
 ipcMain.handle('get-template', async (_event, abbreviation) => {
-  const template = readFileContent(`src/templates/clients/${abbreviation}.json`, 'json');
-  console.log(template)
-  return template;
+  return readFileContent(`src/templates/clients/${abbreviation}.json`, 'json');
 });
 
 ipcMain.handle('get-log-messages', async () => {
