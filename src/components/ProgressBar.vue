@@ -1,31 +1,23 @@
 <template>
   <v-row
-      v-if="!this.projectCreated === null"
       class="progress-bar-container"
   >
-    <div class="spinner-container">
+    <div class="spinner-container" v-if="!this.projectCreated === null">
       <div class="spinner"></div>
     </div>
-    <div class="progress-bar">
+    <div class="progress-bar" v-if="!this.projectCreated === null">
       <div
           class="progress-bar-fill"
           :style="{ width: this.progressPercentage + '%' }"
       ></div>
     </div>
-  </v-row>
-  <v-row
-      v-else-if="this.projectCreated !== null"
-      class="progress-bar-container"
-  >
-    <div class="spinner-container">
+    <div class="spinner-container" v-else>
       <div v-if="this.projectCreated">
         <span class="material-symbols-outlined text-green icon">done_outline</span>
       </div>
       <div v-else>
         <span class="material-symbols-outlined text-red icon">block</span>
       </div>
-    </div>
-    <div>
       <v-btn @click="this.$emit('reset-refs')">
         <span class="material-symbols-outlined">redo</span>
       </v-btn>
@@ -103,6 +95,7 @@ export default defineComponent({
   height: 120px;
   animation: spin 1s linear infinite;
 }
+
 .progress-bar {
   height: 30px;
   width: 100%;
