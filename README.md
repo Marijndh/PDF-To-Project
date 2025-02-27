@@ -1,2 +1,2 @@
 # PDF-To-Project
- Program to automatically create projects for exact online bouw based on a pdf from a outlook email
+ Program to automatically create projects in your API of choice based on a pdf
