@@ -204,7 +204,7 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdatesAndNotify({ title: 'Update beschikbaar', body: 'Er is een nieuwe versie beschikbaar' });
 };
 
 autoUpdater.on("update-available", () => {
