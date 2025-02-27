@@ -11,9 +11,18 @@ import {OAuth2Client} from 'google-auth-library';
 import {gmail} from 'googleapis/build/src/apis/gmail';
 import http from "http";
 import express from "express";
-import {autoUpdater} from "electron-updater";
 import yaml from 'js-yaml';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
+import logger from 'electron-log'
 
+updateElectronApp({
+  updateSource: {
+    type: UpdateSourceType.ElectronPublicUpdateService,
+    repo: 'Marijndh/PDF-To-Project'
+  },
+  updateInterval: '1 hour',
+  logger: logger
+})
 // Convert the local path to a valid file:// URL
 const workerPath = pathToFileURL(path.join(__dirname, '../../node_modules/pdfjs-dist/build/pdf.worker.mjs')).href;
 GlobalWorkerOptions.workerSrc = workerPath;
@@ -203,22 +212,7 @@ const createWindow = () => {
   } else {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
-
-  autoUpdater.checkForUpdatesAndNotify({ title: 'Update beschikbaar', body: 'Er is een nieuwe versie beschikbaar' });
 };
-
-autoUpdater.on("update-available", () => {
-  console.log("Update available!");
-});
-
-autoUpdater.on("update-not-available", () => {
-  console.log("No update available.");
-});
-
-autoUpdater.on("error", (err) => {
-  console.error("Update error:", err);
-});
-
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

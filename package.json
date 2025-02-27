@@ -2,7 +2,7 @@
   "name": "pdf-to-project",
   "productName": "Pdf To Project",
   "description": "Convert your pdf to a project using your designated api",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "build": {
     "appId": "com.marijndh.pdftoproject",
     "publish": [
@@ -41,6 +41,7 @@
     "@mdi/font": "^7.4.47",
     "@mdi/js": "^7.4.47",
     "@types/express": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/nodemailer": "^6.4.17",
     "@types/pdf-parse": "^1.1.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -63,6 +64,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
+    "electron-log": "^5.3.0",
     "electron-squirrel-startup": "^1.0.1",
     "electron-updater": "^6.3.9",
     "express": "^4.21.2",
@@ -74,6 +76,7 @@
     "sass": "^1.84.0",
     "sass-loader": "^16.0.4",
     "tesseract.js": "^6.0.0",
+    "update-electron-app": "^3.1.1",
     "vite-plugin-vuetify": "^2.1.0",
     "vue": "^3.5.13",
     "vuetify": "^3.7.11"
