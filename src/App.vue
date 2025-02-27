@@ -111,7 +111,7 @@ export default defineComponent({
     const setFile = (newFile: File) => {
       logs.value = [];
       file.value = newFile;
-      logs.value.push(new LogLine("info", "File loaded successfully"));
+      logs.value.push(new LogLine("info", "Bestand is succesvol geladen"));
       saveProject();
 
     };
