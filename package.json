@@ -1,8 +1,8 @@
 {
   "name": "pdf-to-project",
-  "productName": "Pdf To Project",
+  "productName": "Pdf To Project Update Test",
   "description": "Convert your pdf to a project using your designated api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "build": {
     "appId": "com.marijndh.pdftoproject",
     "publish": [
