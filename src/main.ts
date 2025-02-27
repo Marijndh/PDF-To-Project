@@ -120,19 +120,19 @@ async function getUserEmail() {
   }
 }
 
-const fetchTokens = () => {
-  const tokensPath = path.resolve(app.getAppPath(), "tokens.json");
-  try {
-    const tokenData = fs.readFileSync(tokensPath, "utf-8");
-    const parsedTokens = JSON.parse(tokenData);
-    oauth2Client.setCredentials(parsedTokens);
-  } catch (error) {
-    console.error("Error loading tokens:", error);
+const tokenPath = path.join(app.getPath("userData"), "tokens.json");
+
+// Function to read tokens
+function fetchTokens() {
+  if (fs.existsSync(tokenPath)) {
+    const tokens = JSON.parse(fs.readFileSync(tokenPath, "utf-8"));
+    oauth2Client.setCredentials(tokens);
+    console.log("Tokens loaded successfully");
+  } else {
+    console.log("No existing tokens found");
   }
 }
-
 const saveTokens = (tokens: any) => {
-  const tokensPath = path.resolve(app.getAppPath(), "tokens.json");
 
   // Create an object to store the tokens
   const tokenData = {
@@ -146,7 +146,7 @@ const saveTokens = (tokens: any) => {
   oauth2Client.setCredentials(tokenData);
 
   try {
-    fs.writeFileSync(tokensPath, JSON.stringify(tokenData, null, 2));
+    fs.writeFileSync(tokenPath, JSON.stringify(tokenData, null, 2));
   } catch (error) {
     console.error("Error saving tokens:", error);
   }

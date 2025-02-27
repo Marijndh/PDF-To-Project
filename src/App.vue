@@ -90,8 +90,7 @@ export default defineComponent({
       });
 
       stepExecutor.addStep('createProject', () => {
-        //return projectController.create(projectExtractor.getTemplate());
-        return Promise.resolve(true);
+        return projectController.create(projectExtractor.getTemplate());
       });
 
       stepExecutor.addStep('logData',async () => {
