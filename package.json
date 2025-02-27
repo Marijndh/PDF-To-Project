@@ -1,7 +1,7 @@
 {
   "name": "pdf-to-project",
   "productName": "Pdf To Project",
-  "description": "Convert your pdf to a project in your designated api",
+  "description": "Convert your pdf to a project using your designated api",
   "version": "1.0.0",
   "build": {
     "appId": "com.marijndh.pdftoproject",
@@ -11,6 +11,11 @@
         "owner": "Marijndh",
         "repo": "PDF-To-Project"
       }
+    ],
+    "files": [
+      "dist/",
+      "node_modules/",
+      ".env.example"
     ]
   },
   "main": ".vite/build/main.js",
@@ -30,10 +35,12 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.1",
     "@electron-forge/plugin-fuses": "^7.6.1",
     "@electron-forge/plugin-vite": "^7.6.1",
+    "@electron-forge/publisher-github": "^7.7.0",
     "@electron-forge/shared-types": "^7.6.1",
     "@electron/fuses": "^1.8.0",
     "@mdi/font": "^7.4.47",
     "@mdi/js": "^7.4.47",
+    "@types/express": "^5.0.0",
     "@types/nodemailer": "^6.4.17",
     "@types/pdf-parse": "^1.1.4",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

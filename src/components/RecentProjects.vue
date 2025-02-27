@@ -37,11 +37,12 @@ export default defineComponent({
   setup(props) {
       let projects = ref<Project[]>([]);
       const projectController = new ProjectController();
-      const openProject = (projectId: number) => {
-        const url = `${import.meta.env.VITE_PROJECT_URL}${projectId}`;
+      const openProject = async (projectId: number) => {
+        const url = `${ await window.electron.getEnvVariable('PROJECT_URL')}${projectId}`;
         window.electron.openExternal(url);
       };
       onMounted(async () => {
+        await projectController.initialize();
         setProjects();
       });
 

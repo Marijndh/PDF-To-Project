@@ -1,15 +1,17 @@
 class RequestController {
-    protected readonly apiUrl: string;
-    protected readonly apiKey: string;
-    protected readonly appName: string;
+    protected apiUrl: string;
+    protected apiKey: string;
+    protected appName: string;
     protected apiToken: string;
-
-
-    constructor() {
-        this.apiUrl = import.meta.env.VITE_API_URL;
-        this.apiKey = import.meta.env.VITE_API_KEY;
-        this.apiToken = import.meta.env.VITE_API_TOKEN;
-        this.appName = import.meta.env.VITE_APPLICATION_NAME;
+    protected isInitialized = false;
+    public async initialize(): Promise<void> {
+        if (!this.isInitialized) {
+            this.apiUrl = await window.electron.getEnvVariable('API_URL') || '';
+            this.apiKey = await window.electron.getEnvVariable('API_KEY') || '';
+            this.apiToken = await window.electron.getEnvVariable('API_TOKEN') || '';
+            this.appName = await window.electron.getEnvVariable('APPLICATION_NAME') || '';
+            this.isInitialized = true;
+        }
     }
 }
 

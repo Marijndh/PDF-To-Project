@@ -9,7 +9,13 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: "**/logs/**, /.env.example$/", // Keeps logs and .env.example outside asar
+    },
+    ignore: [
+      /\.env$/,          // Exclude .env from packaging
+      /logs/,            // Exclude logs from asar
+    ],
   },
   rebuildConfig: {},
   makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],

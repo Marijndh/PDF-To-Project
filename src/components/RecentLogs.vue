@@ -18,7 +18,8 @@
       <v-card>
         <v-card-title>Email versturen</v-card-title>
         <v-card-text class="py-0">
-          <v-textarea v-model="this.emailMessage" label="Bericht" rows="3" no-resize style="font-size: 36px;"></v-textarea>
+          <v-textarea v-model="this.emailMessage" label="Bericht" rows="3" no-resize
+                      style="font-size: 36px;"></v-textarea>
         </v-card-text>
         <v-card-actions>
           <v-btn class="" @click="this.isEmailDialogOpen = false; this.emailMessage = ''">Annuleren</v-btn>
@@ -102,12 +103,14 @@ export default defineComponent({
   background: white;
   border-radius: 8px;
 }
+
 .scrollable-container {
   padding: 16px 16px 16px 20px;
   direction: rtl;
   height: 556px;
   overflow-y: clip;
 }
+
 .log-row {
   border-bottom: 2px solid #90a4ae;
   direction: ltr;
@@ -133,12 +136,13 @@ export default defineComponent({
   overflow: clip;
   height: 40px;
   font-size: 13px;
-  font-family: Verdana,sans-serif;
+  font-family: Verdana, sans-serif;
 }
 
 .log-row:hover {
   background-color: #f0f0f0;
 }
+
 .no-bottom-border {
   border-bottom: none;
 }
@@ -150,7 +154,7 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-family: Verdana,sans-serif;
+  font-family: Verdana, sans-serif;
   font-weight: bolder;
 }
 </style>

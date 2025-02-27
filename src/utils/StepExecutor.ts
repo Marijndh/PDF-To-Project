@@ -12,7 +12,7 @@ export default class StepExecutor {
         this.currentStep = currentStep;
     }
 
-    public async initializeLogMessages(): Promise<number> {
+    public async initializeLogMessages(): Promise<void> {
         const logJson = await window.electron.getLogMessages();
         this.logMessages = Object.entries(logJson).reduce((acc, [key, value]) => {
             acc[key] = (value as Array<{ type: string; message: string }>).map(
@@ -20,8 +20,6 @@ export default class StepExecutor {
             );
             return acc;
         }, {} as Record<string, Array<LogLine>>);
-
-        return Object.keys(this.logMessages).length;
     }
 
     public getTotalSteps(): number {

@@ -61,9 +61,10 @@ export default defineComponent({
     const saveProject = async () => {
       if (!file.value) return;
       const stepExecutor = new StepExecutor(logs.value, currentStep.value);
-      await stepExecutor.initializeLogMessages();
+      stepExecutor.initializeLogMessages();
       const projectExtractor = new ProjectExtractor();
       const projectController = new ProjectController();
+      await projectController.initialize();
 
       stepExecutor.addStep('textExtraction',async () => {
         const text = await window.electron.textFromPdf(await file.value.arrayBuffer());
@@ -72,11 +73,11 @@ export default defineComponent({
         return true;
       });
 
-      stepExecutor.addStep('findClient',async () => {
+      stepExecutor.addStep('findClient',() => {
         return projectExtractor.findClient();
       });
 
-      stepExecutor.addStep('findTemplate',async () => {
+      stepExecutor.addStep('findTemplate',() => {
         return projectExtractor.fetchTemplate();
       });
 

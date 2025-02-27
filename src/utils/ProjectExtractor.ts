@@ -3,7 +3,6 @@ import Client from "@/entity/Client";
 import {LogLine} from "@/entity/LogLine";
 import {AttributeIdentifier} from "@/entity/AttributeIdentifier";
 import Project from "@/entity/Project";
-import projectBuilder from "@/utils/ProjectBuilder";
 
 export default class ProjectExtractor {
     private client: Client;
@@ -89,7 +88,7 @@ export default class ProjectExtractor {
     }
 
     private processFStringAttribute(name: string, identifier: string, ): void {
-        const matches = identifier.match(/\{(\w+)\}/g);
+        const matches = identifier.match(/\{(\w+)}/g);
         if (matches) {
             const currentProject: Project = this.projectBuilder.build();
             let value = identifier;
@@ -104,7 +103,7 @@ export default class ProjectExtractor {
         }
     }
 
-    private setValue(name: string, value: string, capitalize: boolean = false): void {
+    private setValue(name: string, value: string, capitalize = false): void {
         const finalValue = capitalize ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : value;
         this.projectBuilder = (this.projectBuilder as any)[`set${name.charAt(0).toUpperCase() + name.slice(1)}`](finalValue);
     }
@@ -129,7 +128,7 @@ export default class ProjectExtractor {
     public async fillTemplate(): Promise<boolean> {
         const project: Project = this.projectBuilder.build();
         for (const key in this.template) {
-            if (this.template.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.template, key)) {
                 const newValue = project.getAttributeValue(key);
                 if (newValue !== undefined) {
                     this.template[key] = newValue;

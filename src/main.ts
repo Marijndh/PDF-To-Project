@@ -12,6 +12,7 @@ import {gmail} from 'googleapis/build/src/apis/gmail';
 import http from "http";
 import express from "express";
 import {autoUpdater} from "electron-updater";
+import yaml from 'js-yaml';
 
 // Convert the local path to a valid file:// URL
 const workerPath = pathToFileURL(path.join(__dirname, '../../node_modules/pdfjs-dist/build/pdf.worker.mjs')).href;
@@ -22,12 +23,42 @@ if (started) {
   app.quit();
 }
 
-dotenv.config();
+// Define paths
+const envPath = path.join(app.getPath("userData"), ".env"); // Writable location
+const envExamplePath = path.join(app.getAppPath(), ".env.example"); // Inside asar
+
+// Ensure .env exists, creating it from .env.example if needed
+if (!fs.existsSync(envPath)) {
+  try {
+    const exampleExists = fs.existsSync(envExamplePath);
+    if (exampleExists) {
+      fs.copyFileSync(envExamplePath, envPath);
+      console.log(".env file created from .env.example");
+    } else {
+      console.warn(".env.example not found, creating an empty .env file.");
+      fs.writeFileSync(envPath, "");
+    }
+  } catch (error) {
+    console.error("Error creating .env file:", error);
+  }
+}
+// Load environment variables
+dotenv.config({ path: envPath });
+
+// Use userData path for logs
+const logDir = path.join(app.getPath("userData"), "logs");
+
+// Ensure log folder exists
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+  console.log("Log directory created:", logDir);
+}
+
 
 const oauth2Client = new OAuth2Client(
-    import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
-    import.meta.env.VITE_GOOGLE_REDIRECT_URI
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
 );
 
 let serverStarted = false; // Flag to track if the server is already started
@@ -76,7 +107,7 @@ async function getUserEmail() {
   try {
     const oauth2ClientCredentials = oauth2Client.credentials;
     if (!oauth2ClientCredentials.access_token) {
-      throw new Error('No access token found!');
+      console.error('No access token found!');
     }
 
     const gmailSession = gmail({ version: 'v1', auth: oauth2Client });
@@ -90,7 +121,7 @@ async function getUserEmail() {
 }
 
 const fetchTokens = () => {
-  const tokensPath = path.resolve(process.cwd(), "tokens.json");
+  const tokensPath = path.resolve(app.getAppPath(), "tokens.json");
   try {
     const tokenData = fs.readFileSync(tokensPath, "utf-8");
     const parsedTokens = JSON.parse(tokenData);
@@ -101,7 +132,7 @@ const fetchTokens = () => {
 }
 
 const saveTokens = (tokens: any) => {
-  const tokensPath = path.resolve(process.cwd(), "tokens.json");
+  const tokensPath = path.resolve(app.getAppPath(), "tokens.json");
 
   // Create an object to store the tokens
   const tokenData = {
@@ -132,6 +163,20 @@ const getNewAccessToken = () => {
   console.log(`Opening this URL in the default browser: ${authUrl}`);
   shell.openExternal(authUrl); // Open the URL automatically in the default browser
 }
+
+const readFileContent = (relativePath: string, type: 'buffer' | 'json' | 'yaml'): any => {
+  const filePath = path.resolve(app.getAppPath(), relativePath);
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found: ${filePath}`);
+  }
+  const fileContent = fs.readFileSync(filePath, type === 'buffer' ? null : 'utf-8');
+  if (type === 'json') {
+    return JSON.parse(fileContent);
+  } else if (type === 'yaml') {
+    return yaml.load(fileContent);
+  }
+  return Buffer.from(fileContent);
+};
 
 const createWindow = () => {
   // Create the browser window.
@@ -174,7 +219,6 @@ autoUpdater.on("error", (err) => {
   console.error("Update error:", err);
 });
 
-app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -187,33 +231,20 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-ipcMain.on("update-token", (event, token) => {
-  try {
-    const envPath = path.resolve(process.cwd(), ".env");
-    const envContent = fs.readFileSync(envPath, "utf-8");
-
-    const updatedEnvContent = envContent.replace(/API_TOKEN=.*/g, `API_TOKEN=${token}`);
-    fs.writeFileSync(envPath, updatedEnvContent);
-
-    dotenv.config();
-  } catch (error) {
-    console.error("Failed to update token:", error);
-  }
+ipcMain.handle('get-env-variable', async(_event, variable) => {
+  return process.env[variable];
 });
+
 
 ipcMain.handle('open-external', async (_event, url) => {
   await shell.openExternal(url);
 });
 
 ipcMain.handle('get-logs', async (_event, amount: number) => {
-  const logDir = path.resolve(process.cwd(), "logs");
-
   if (!fs.existsSync(logDir)) {
-    console.error(`Directory not found: ${logDir}`);
+    console.error(`Logdirectory not found: ${logDir}`);
     return [];
   }
-
 
   const allDirs = fs.readdirSync(logDir)
       .filter(file => fs.statSync(path.join(logDir, file)).isDirectory())
@@ -232,6 +263,30 @@ ipcMain.handle('open-file', async (_event, path) => {
   await shell.openPath(path);
 });
 
+ipcMain.handle("update-token", (_event, token) => {
+  try {
+    if (!fs.existsSync(envPath)) {
+      fs.writeFileSync(envPath, "API_TOKEN=\n");
+    }
+
+    let envContent = fs.readFileSync(envPath, "utf-8");
+
+    // Replace API_TOKEN dynamically
+    if (envContent.includes("API_TOKEN=")) {
+      envContent = envContent.replace(/API_TOKEN=.*/g, `API_TOKEN=${token}`);
+    } else {
+      envContent += `\nAPI_TOKEN=${token}`;
+    }
+
+    fs.writeFileSync(envPath, envContent);
+    dotenv.config({ path: envPath });
+
+    console.log("Updated API_TOKEN in .env");
+  } catch (error) {
+    console.error("Failed to update token:", error);
+  }
+});
+
 ipcMain.handle('send-email', async (_event,directory, name, message) => {
   fetchTokens();
 
@@ -248,8 +303,8 @@ ipcMain.handle('send-email', async (_event,directory, name, message) => {
     auth: {
       type: "OAuth2",
       user: userEmail,
-      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      clientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       refreshToken: oauth2Client.credentials.refresh_token,
       accessToken: oauth2Client.credentials.access_token!,
     },
@@ -266,7 +321,7 @@ ipcMain.handle('send-email', async (_event,directory, name, message) => {
 
   const mailOptions = {
     from: userEmail,
-    to: import.meta.env.VITE_EMAIL_TO,
+    to: process.env.EMAIL_TO,
     subject: 'LogLine-File: ' + name,
     text: message + '\n\n' + txtFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf-8')).join('\n\n'),
     attachments: attachments.map(file => ({filename: file, path: path.join(directory, file)})),
@@ -304,7 +359,7 @@ ipcMain.handle('text-from-pdf', async (_event, buffer) => {
 });
 
 ipcMain.handle('get-clients', async () => {
-  const templatesDir = path.resolve(process.cwd(), 'src/templates/mapping');
+  const templatesDir = path.resolve(app.getAppPath(), 'src/templates/mapping');
   const files = fs.readdirSync(templatesDir);
   const clients = [];
 
@@ -312,7 +367,6 @@ ipcMain.handle('get-clients', async () => {
     if (path.extname(file) === '.yaml') {
       const filePath = path.join(templatesDir, file);
       const fileContent = fs.readFileSync(filePath, 'utf-8');
-      const yaml = require('js-yaml');
       const yamlContent = yaml.load(fileContent);
       if (yamlContent.name && yamlContent.abbreviation && yamlContent.identifier && yamlContent.projectAttributes) {
         clients.push({
@@ -327,46 +381,37 @@ ipcMain.handle('get-clients', async () => {
   return clients;
 });
 
-ipcMain.handle('get-test-file', async () => {
+ipcMain.handle('get-test-file', async() => {
   return readFileContent('src/test-files/BW.pdf', 'buffer');
 });
 
-ipcMain.handle('get-template', async (_event, abbreviation) => {
+ipcMain.handle('get-template', async(_event, abbreviation) => {
   return readFileContent(`src/templates/clients/${abbreviation}.json`, 'json');
 });
 
-ipcMain.handle('get-log-messages', async () => {
+ipcMain.handle('get-log-messages', async() => {
   return readFileContent('src/templates/logMessages.yaml', 'yaml');
 });
 
-const readFileContent = (relativePath: string, type: 'buffer' | 'json' | 'yaml'): any => {
-  const filePath = path.resolve(process.cwd(), relativePath);
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`File not found: ${filePath}`);
-  }
-  const fileContent = fs.readFileSync(filePath, type === 'buffer' ? null : 'utf-8');
-  if (type === 'json') {
-    return JSON.parse(fileContent);
-  } else if (type === 'yaml') {
-    const yaml = require('js-yaml');
-    return yaml.load(fileContent);
-  }
-  return Buffer.from(fileContent);
-};
-
 ipcMain.handle('create-log', async (_event, messages, text, projectData, fileBuffer) => {
   try {
-    const logDir = path.resolve(process.cwd(), 'logs', new Date().toISOString().replace(/[:.]/g, '-'));
-    fs.mkdirSync(logDir, { recursive: true });
 
-    const pdfPath = path.join(logDir, 'file.pdf');
+    if (!fs.existsSync(logDir)) {
+      console.error(`Logdirectory not found: ${logDir}`);
+      return [];
+    }
+    const log = path.resolve(logDir, new Date().toISOString().replace(/[:.]/g, '-'));
+
+    fs.mkdirSync(log, { recursive: true });
+
+    const pdfPath = path.join(log, 'file.pdf');
     fs.writeFileSync(pdfPath, Buffer.from(fileBuffer));
 
-    const jsonPath = path.join(logDir, 'data.json');
+    const jsonPath = path.join(log, 'data.json');
     fs.writeFileSync(jsonPath, JSON.stringify(projectData, null, 2));
 
-    const messagesPath = path.join(logDir, 'messages.txt');
-    fs.writeFileSync(messagesPath, messages.join('\n'));
+    const messagesPath = path.join(log, 'messages.txt');
+    fs.writeFileSync(messagesPath, text + '\n\n' + messages.join('\n'));
 
     return true;
   } catch (error) {
@@ -374,3 +419,5 @@ ipcMain.handle('create-log', async (_event, messages, text, projectData, fileBuf
     return false;
   }
 });
+
+app.on('ready', createWindow);

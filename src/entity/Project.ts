@@ -9,8 +9,6 @@ class Project {
     private customAttributeValues: Array<string> = [];
     private reference: string;
 
-    constructor() {}
-
     public setId(id: number): Project {
         this.id = id;
         return this;
