@@ -39,6 +39,7 @@ import ProjectExtractor from "@/utils/ProjectExtractor";
 import ProjectController from "@/controller/ProjectController";
 import StepExecutor from "@/utils/StepExecutor";
 import {LogLine} from "@/entity/LogLine";
+import project from "@/entity/Project";
 
 export default defineComponent({
   name: "MainComponent",

@@ -275,6 +275,7 @@ ipcMain.handle("update-token", (_event, token) => {
     fs.writeFileSync(envPath, envContent);
     dotenv.config({ path: envPath });
 
+    // TODO fix to many updates
     console.log("Updated API_TOKEN in .env");
   } catch (error) {
     console.error("Failed to update token:", error);
@@ -387,7 +388,7 @@ ipcMain.handle('get-log-messages', async() => {
   return readFileContent('src/templates/logMessages.yaml', 'yaml');
 });
 
-ipcMain.handle('create-log', async (_event, messages, text, projectData, fileBuffer) => {
+ipcMain.handle('create-log', async (_event, messages, text, projectData, fileBuffer, projectObject) => {
   try {
 
     if (!fs.existsSync(logDir)) {
@@ -401,8 +402,12 @@ ipcMain.handle('create-log', async (_event, messages, text, projectData, fileBuf
     const pdfPath = path.join(log, 'file.pdf');
     fs.writeFileSync(pdfPath, Buffer.from(fileBuffer));
 
-    const jsonPath = path.join(log, 'data.json');
-    fs.writeFileSync(jsonPath, JSON.stringify(projectData, null, 2));
+    const projectDataPath = path.join(log, 'data.json');
+    fs.writeFileSync(projectDataPath, JSON.stringify(projectData, null, 2));
+
+    console.log(projectObject);
+    const projectObjectPath = path.join(log, 'project.json');
+    fs.writeFileSync(projectObjectPath, projectObject);
 
     const messagesPath = path.join(log, 'messages.txt');
     fs.writeFileSync(messagesPath, text + '\n\n' + messages.join('\n'));

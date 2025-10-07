@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld("electron", {
     getTestFile: () => ipcRenderer.invoke("get-test-file"),
     getTemplate: (abbreviation: string) => ipcRenderer.invoke("get-template", abbreviation),
     getLogMessages: () => ipcRenderer.invoke("get-log-messages"),
-    createLog: (messages: Array<string>, text: Array<string>, projectData: Record<string,unknown>, fileBuffer: ArrayBuffer) => ipcRenderer.invoke("create-log", messages, text, projectData, fileBuffer),
+    createLog: (messages: Array<string>, text: Array<string>, projectData: Record<string,unknown>, fileBuffer: ArrayBuffer, project: string) => ipcRenderer.invoke("create-log", messages, text, projectData, fileBuffer, project),
     getEnvVariable: (variable: string) => ipcRenderer.invoke("get-env-variable", variable),
     updateToken: (token: string) => ipcRenderer.invoke("update-token", token),
 });

@@ -9,6 +9,7 @@ export default class ProjectExtractor {
     private text: Array<string>;
     private template: Record<string, unknown>;
     private projectBuilder: ProjectBuilder;
+    private project: Project;
 
     constructor() {
         this.projectBuilder = new ProjectBuilder();
@@ -90,6 +91,7 @@ export default class ProjectExtractor {
     private processFStringAttribute(name: string, identifier: string, ): void {
         const matches = identifier.match(/\{(\w+)}/g);
         if (matches) {
+            // TODO check if this is double building with other parts of the code
             const currentProject: Project = this.projectBuilder.build();
             let value = identifier;
             matches.forEach(match => {
@@ -118,6 +120,7 @@ export default class ProjectExtractor {
             }
         });
         identifiers.forEach(attribute => {
+            // TODO refactor this to enum
             if (attribute.getType() === 'F') {
                 this.processFStringAttribute(attribute.getName(), attribute.getIdentifier());
             }
@@ -127,10 +130,12 @@ export default class ProjectExtractor {
 
     public async fillTemplate(): Promise<boolean> {
         const project: Project = this.projectBuilder.build();
+        this.project = project;
         for (const key in this.template) {
             if (Object.prototype.hasOwnProperty.call(this.template, key)) {
                 const newValue = project.getAttributeValue(key);
                 if (newValue !== undefined) {
+
                     this.template[key] = newValue;
                 }
             }
@@ -141,7 +146,7 @@ export default class ProjectExtractor {
     public async createLog(logs: Array<LogLine>, file: File): Promise<boolean> {
         const messages = logs.map(log => log.getMessage());
         const arrayBuffer = await file.arrayBuffer();
-        return window.electron.createLog(messages, this.text, this.template, arrayBuffer);
+        return window.electron.createLog(messages, this.text, this.template, arrayBuffer, JSON.stringify(this.project, null, 2));
     }
 
 }
