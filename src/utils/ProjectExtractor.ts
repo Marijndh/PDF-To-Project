@@ -131,17 +131,30 @@ export default class ProjectExtractor {
     public async fillTemplate(): Promise<boolean> {
         const project: Project = this.projectBuilder.build();
         this.project = project;
+
         for (const key in this.template) {
             if (Object.prototype.hasOwnProperty.call(this.template, key)) {
                 const newValue = project.getAttributeValue(key);
                 if (newValue !== undefined) {
-
                     this.template[key] = newValue;
                 }
             }
         }
-        return true
+        const customAttributes = project.getCustomAttributeValues();
+        if (
+            Array.isArray(customAttributes) &&
+            Array.isArray(this.template.customAttributeValues)
+        ) {
+            this.template.customAttributeValues.forEach((entry, index) => {
+                if (index < customAttributes.length) {
+                    entry.value = customAttributes[index];
+                }
+            });
+        }
+
+        return true;
     }
+
 
     public async createLog(logs: Array<LogLine>, file: File): Promise<boolean> {
         const messages = logs.map(log => log.getMessage());

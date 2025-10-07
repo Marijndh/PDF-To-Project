@@ -96,5 +96,10 @@ class Project {
                 return undefined;
         }
     }
+
+    public getCustomAttributeValues(): Array<string> {
+        return this.customAttributeValues;
+    }
+
 }
 export default Project;
