@@ -16,6 +16,7 @@ projectAttributes:
     identifier: \b\d{4}\b && ^[A-Z]{2}$
     range: -1
     type: R
+    format: ^\d+[A-Z]?
   zipCode:
     identifier: \b\d{4}\b && ^[A-Z]{2}$
     range: 0|1

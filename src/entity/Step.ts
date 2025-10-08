@@ -5,12 +5,14 @@ export default class Step {
     private stepFunction: () => Promise<boolean>;
     private successLog: LogLine;
     private errorLog: LogLine;
+    readonly alwaysExecute: boolean;
 
-    constructor(name: string, stepFunction: () => Promise<boolean>, logMessages: Array<LogLine>) {
+    constructor(name: string, stepFunction: () => Promise<boolean>, logMessages: Array<LogLine>, alwaysExecute: boolean) {
         this.name = name;
         this.stepFunction = stepFunction;
         this.successLog = logMessages[0];
         this.errorLog = logMessages[1];
+        this.alwaysExecute = alwaysExecute;
     }
 
     public async execute(): Promise<boolean> {

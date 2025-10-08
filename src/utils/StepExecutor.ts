@@ -1,6 +1,7 @@
 import {LogLine} from "@/entity/LogLine";
 import Step from "@/entity/Step";
 
+
 export default class StepExecutor {
     private steps: Array<Step> = [];
     private currentStep: number;
@@ -30,30 +31,33 @@ export default class StepExecutor {
         return this.currentStep;
     }
 
-    addStep(name: string, stepFunction: () => Promise<boolean>): void {
+    addStep(name: string, stepFunction: () => Promise<boolean>, alwaysExecute = false): void {
         if (this.logMessages[name] && Array.isArray(this.logMessages[name]) && this.logMessages[name].length === 2) {
-            this.steps.push(new Step(name, stepFunction, this.logMessages[name]));
+            this.steps.push(new Step(name, stepFunction, this.logMessages[name], alwaysExecute));
         } else {
             this.logs.push(new LogLine("error", `Step ${name} not found in log messages`));
         }
     }
 
     async runSteps(): Promise<boolean> {
+        let stepsSucceeded = true;
         for (; this.currentStep <= this.steps.length; this.currentStep++) {
             const step: Step = this.steps[this.currentStep - 1];
+            // If the previous step failed and this step is not set to always execute, skip it
+            if (!step.alwaysExecute && !stepsSucceeded) continue;
             try {
                 const result = await step.execute();
                 if (!result) {
                     this.logs.push(step.getErrorLog());
-                    return false;
+                    stepsSucceeded = false;
                 } else {
                     this.logs.push(step.getSuccessLog());
                 }
             } catch (error) {
                 this.logs.push(new LogLine("error", `Step ${this.currentStep} failed with error: ${error.message}`));
-                return false;
+                stepsSucceeded = false;
             }
         }
-        return true;
+        return stepsSucceeded;
     }
 }

@@ -3,6 +3,7 @@ import Client from "@/entity/Client";
 import {LogLine} from "@/entity/LogLine";
 import {AttributeIdentifier} from "@/entity/AttributeIdentifier";
 import Project from "@/entity/Project";
+import {AttributeType} from "@/enums/AttributeType";
 
 export default class ProjectExtractor {
     private client: Client;
@@ -56,20 +57,20 @@ export default class ProjectExtractor {
     }
 
     private searchValueInText(identifier: string, type: string, range?: string): string | undefined {
-        let index: number;
+        let index = -1;
 
-        if (type === 'R') {
+        if (type === AttributeType.REGEX) {
             const regexes: Array<RegExp> = identifier.split('&&').map(part => new RegExp(part.trim()));
+
+            // try to match split text
             index = this.text.findIndex((text, idx) => {
                 return regexes.every((regex, regexIdx) => {
                     const searchText = this.text[idx + regexIdx];
                     return searchText && regex.test(searchText);
-               });
+                });
             });
-        } else if (type === 'S') {
+        } else if (type === AttributeType.STRING) {
             index = this.text.findIndex(text => text.toLowerCase().includes(identifier.toLowerCase()));
-        } else {
-            return undefined;
         }
 
         if (index === -1) {
@@ -107,21 +108,38 @@ export default class ProjectExtractor {
 
     private setValue(name: string, value: string, capitalize = false): void {
         const finalValue = capitalize ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : value;
+        // TODO refactor this to more type save changes
         this.projectBuilder = (this.projectBuilder as any)[`set${name.charAt(0).toUpperCase() + name.slice(1)}`](finalValue);
     }
 
     public async fetchProjectAttributes(): Promise<boolean> {
-        const identifiers: Array<AttributeIdentifier> = this.client.getAttributeIdentifiers();
+        const identifiers = this.client.getAttributeIdentifiers();
+
         identifiers.forEach(attribute => {
-            const value = this.searchValueInText(attribute.getIdentifier(), attribute.getType(), attribute.getRange());
+            let value = this.searchValueInText(
+                attribute.getIdentifier(),
+                attribute.getType(),
+                attribute.getRange()
+            );
+
+            if (!value) return;
+
             const name = attribute.getName();
-            if (value) {
-                this.setValue(name, value, true);
+
+            // If a format regex is defined, extract the first substring that matches
+            if (attribute.format) {
+                const regex = new RegExp(attribute.format);
+                const match = value.match(regex);
+
+                if (match) {
+                    value = match[0]; // keep only the part that matches the format
+                }
             }
+
+            this.setValue(name, value, true);
         });
         identifiers.forEach(attribute => {
-            // TODO refactor this to enum
-            if (attribute.getType() === 'F') {
+            if (attribute.getType() === AttributeType.FORMATTEDSTRING) {
                 this.processFStringAttribute(attribute.getName(), attribute.getIdentifier());
             }
         });
@@ -140,13 +158,15 @@ export default class ProjectExtractor {
                 }
             }
         }
+
+        // TODO set customAttributes better in Project class and ProjectBuilder to be able to write it like the other attributes
         const customAttributes = project.getCustomAttributeValues();
         if (
             Array.isArray(customAttributes) &&
             Array.isArray(this.template.customAttributeValues)
         ) {
             this.template.customAttributeValues.forEach((entry, index) => {
-                if (index < customAttributes.length) {
+                if (index < customAttributes.length && customAttributes[index] !== undefined) {
                     entry.value = customAttributes[index];
                 }
             });
@@ -154,7 +174,6 @@ export default class ProjectExtractor {
 
         return true;
     }
-
 
     public async createLog(logs: Array<LogLine>, file: File): Promise<boolean> {
         const messages = logs.map(log => log.getMessage());

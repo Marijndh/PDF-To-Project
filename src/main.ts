@@ -399,19 +399,26 @@ ipcMain.handle('create-log', async (_event, messages, text, projectData, fileBuf
 
     fs.mkdirSync(log, { recursive: true });
 
-    const pdfPath = path.join(log, 'file.pdf');
-    fs.writeFileSync(pdfPath, Buffer.from(fileBuffer));
+     if (fileBuffer !== undefined) {
+       const pdfPath = path.join(log, 'file.pdf');
+       fs.writeFileSync(pdfPath, Buffer.from(fileBuffer));
+     }
 
-    const projectDataPath = path.join(log, 'data.json');
-    fs.writeFileSync(projectDataPath, JSON.stringify(projectData, null, 2));
+     if (projectData !== undefined) {
+       const projectDataPath = path.join(log, 'data.json');
+       fs.writeFileSync(projectDataPath, JSON.stringify(projectData, null, 2));
+     }
 
-    console.log(projectObject);
-    const projectObjectPath = path.join(log, 'project.json');
-    fs.writeFileSync(projectObjectPath, projectObject);
+     if (projectObject !== undefined) {
+       console.log(projectObject);
+       const projectObjectPath = path.join(log, 'project.json');
+       fs.writeFileSync(projectObjectPath, projectObject);
+     }
 
-    const messagesPath = path.join(log, 'messages.txt');
-    fs.writeFileSync(messagesPath, text + '\n\n' + messages.join('\n'));
-
+     if (messages !== undefined) {
+       const messagesPath = path.join(log, 'messages.txt');
+       fs.writeFileSync(messagesPath, text + '\n\n' + messages.join('\n'));
+     }
     return true;
   } catch (error) {
     console.error('Error creating log:', error);
