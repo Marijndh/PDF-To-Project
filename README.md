@@ -1,2 +1,2 @@
 # PDF-To-Project
- Program to automatically create projects in your API of choice based on a pdf
+ Program to automatically create projects for Exact Bouw extracting the data from pdf's using attribute mapping
