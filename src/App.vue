@@ -90,9 +90,9 @@ export default defineComponent({
         return projectExtractor.fillTemplate();
       });
 
-      // stepExecutor.addStep('createProject', () => {
-      //   return projectController.create(projectExtractor.getTemplate());
-      // });
+      stepExecutor.addStep('createProject', () => {
+        return projectController.create(projectExtractor.getTemplate());
+      });
 
       stepExecutor.addStep('logData',async () => {
         return projectExtractor.createLog(logs.value, file.value);
