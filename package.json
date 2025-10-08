@@ -2,7 +2,7 @@
   "name": "pdf-to-project",
   "productName": "PDF To Project",
   "description": "Convert your pdf to a project using your designated api",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "build": {
     "appId": "com.marijndh.pdftoproject",
     "publish": [
